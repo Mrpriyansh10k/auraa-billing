@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Auraa Billing – Final Stable</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0;padding:10px}
+.box{background:#fff;padding:15px;border-radius:8px;margin-bottom:12px;max-width:1100px;margin:auto}
+.hidden{display:none}
+input,textarea,select,button{
+ width:100%;padding:8px;margin-top:6px;
+ font-size:14px;border-radius:4px;border:1px solid #ccc
+}
+button{background:#25D366;color:#fff;border:none}
+button:disabled{background:#aaa}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+th{background:#f2c94c}
+.lock{background:#ffe0e0;padding:12px;border-radius:6px}
+.history-item{border-bottom:1px solid #ddd;padding:8px;cursor:pointer}
+.history-item:hover{background:#fafafa}
+.invoice{background:#fff8dc;padding:15px;border:2px solid #f2c94c;margin-top:15px}
+.admin{background:#eef;padding:12px;border-radius:6px}
+
+/* 🔥 PRINT FIX – SIRF INVOICE */
+@media print{
+ body *{visibility:hidden !important;}
+ #invoiceBox,#invoiceBox *{visibility:visible !important;}
+ #invoiceBox{
+  position:absolute;
+  left:0;top:0;
+  width:100%;
+ }
+}
+</style>
+</head>
+
+<body>
+
+<div class="box" id="loginBox">
+<h2>Login</h2>
+<input id="lMobile" placeholder="Mobile">
+<input id="lPass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<p>
+<a onclick="show('registerBox')">Register</a> |
+<a onclick="show('forgotBox')">Forgot?</a> |
+<a onclick="show('adminLoginBox')">Admin</a>
+</p>
+<p id="loginErr" style="color:red"></p>
+</div>
+
+<div class="box hidden" id="registerBox">
+<h2>Register Shop</h2>
+<input id="rShopName" placeholder="Shop Name">
+<textarea id="rShopAddr" placeholder="Shop Address"></textarea>
+<input id="rMobile" placeholder="Owner Mobile">
+<input id="rPass" type="password" placeholder="Password">
+<input id="rPin" type="password" placeholder="Secret PIN">
+<button onclick="register()">Register</button>
+<button onclick="show('loginBox')">Back</button>
+<p id="regErr" style="color:red"></p>
+</div>
+
+<div class="box hidden" id="forgotBox">
+<h2>Reset Password</h2>
+<input id="fMobile" placeholder="Mobile">
+<input id="fPin" type="password" placeholder="PIN">
+<input id="fNewPass" type="password" placeholder="New Password">
+<button onclick="resetPass()">Reset</button>
+<button onclick="show('loginBox')">Back</button>
+<p id="fpErr" style="color:red"></p>
+</div>
+
+<div class="box hidden" id="adminLoginBox">
+<h2>Admin Login</h2>
+<input id="adminPass" type="password" placeholder="Admin Password">
+<button onclick="adminLogin()">Login</button>
+<button onclick="show('loginBox')">Back</button>
+<p id="adminErr" style="color:red"></p>
+</div>
+
+<div class="box hidden admin" id="adminBox">
+<h2>Admin – Extend Subscription</h2>
+<input id="adminUserMobile" placeholder="Shop Owner Mobile">
+<select id="adminDuration">
+<option value="7">7 Days</option>
+<option value="30">1 Month</option>
+<option value="90">3 Months</option>
+<option value="180">6 Months</option>
+<option value="365">1 Year</option>
+</select>
+<button onclick="extendExpiry()">Extend Validity</button>
+<button onclick="show('loginBox')">Logout</button>
+<p id="adminMsg"></p>
+</div>
+
+<div class="box hidden" id="appBox">
+<h2 id="shopTitle"></h2>
+<p>Expiry: <b id="expText"></b></p>
+
+<div class="lock hidden" id="lockMsg">
+<b>Subscription expired</b><br>
+Billing locked.<br><br>
+📞 <a href="tel:8000595588">Call: 8000595588</a><br>
+💬 <a href="https://wa.me/918000595588">WhatsApp</a><br>
+📸 <a href="https://instagram.com/mr_priyansh_10k">Instagram</a>
+</div>
+
+<h3>Customer Details</h3>
+<input id="custName" placeholder="Customer Name">
+<input id="custMobile" placeholder="Customer Mobile">
+<textarea id="custAddr" placeholder="Customer Address"></textarea>
+
+<h3>Add / Edit Item</h3>
+<input id="itemName" placeholder="Item Name">
+<input id="itemMRP" type="number" placeholder="MRP">
+<input id="itemSell" type="number" placeholder="Selling Price">
+<input id="itemQty" type="number" placeholder="Qty">
+<button onclick="addItem()">Add / Update Item</button>
+
+<table>
+<thead>
+<tr><th>#</th><th>Item</th><th>MRP</th><th>Selling</th><th>Qty</th><th>Disc</th><th>Amount</th><th>Action</th></tr>
+</thead>
+<tbody id="itemList"></tbody>
+</table>
+
+<h3>Bill Discount</h3>
+<select id="billDiscType" onchange="calcTotal()">
+<option value="">No Discount</option>
+<option value="fixed">Fixed ₹</option>
+<option value="percent">Percent %</option>
+</select>
+<input id="billDiscVal" type="number" placeholder="Discount value" oninput="calcTotal()">
+
+<h2>Total Payable: ₹ <span id="finalTotal">0.00</span></h2>
+<button onclick="generateInvoice()">Generate Invoice</button>
+
+<h3>History</h3>
+<input id="search" placeholder="Search customer / amount / date" oninput="renderHistory()">
+<div id="historyList"></div>
+
+<div class="invoice hidden" id="invoiceBox">
+<h3>Invoice</h3>
+<p><b>Shop:</b> <span id="invShop"></span></p>
+<p><b>Owner:</b> <span id="invOwner"></span></p>
+<p><b>Address:</b> <span id="invShopAddr"></span></p>
+<p>Date: <span id="invDate"></span></p>
+<p>Customer: <span id="invCust"></span></p>
+
+<table>
+<thead>
+<tr><th>#</th><th>Item</th><th>MRP</th><th>Selling</th><th>Qty</th><th>Disc</th><th>Amount</th></tr>
+</thead>
+<tbody id="invItems"></tbody>
+</table>
+
+<p>Bill Discount: ₹ <span id="invBillDisc"></span></p>
+<h2>Total: ₹ <span id="invTotal"></span></h2>
+<button onclick="window.print()">Print / Save PDF</button>
+</div>
+</div>
+
+<script>
+const ADMIN_PASSWORD="admin123";
+const DEVICE=btoa(navigator.userAgent+screen.width+screen.height);
+let users=JSON.parse(localStorage.getItem("users")||"{}");
+let history=JSON.parse(localStorage.getItem("billingHistory")||"[]");
+let currentUser=null,items=[],editIndex=null,IS_LOCKED=false;
+
+function show(id){
+ document.querySelectorAll(".box").forEach(b=>b.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+}
+
+function register(){
+ let shop=rShopName.value,addr=rShopAddr.value,mob=rMobile.value,pass=rPass.value,pin=rPin.value;
+ if(!shop||!addr||!mob||!pass||!pin){regErr.innerText="Fill all";return;}
+ if(users[mob]){regErr.innerText="Already registered";return;}
+ let exp=new Date();exp.setDate(exp.getDate()+7);
+ users[mob]={shop,addr,pass,pin,exp:exp.toISOString(),device:DEVICE};
+ localStorage.setItem("users",JSON.stringify(users));
+ alert("Registered with 7 days trial");
+ show('loginBox');
+}
+
+function login(){
+ let mob=lMobile.value,pass=lPass.value,u=users[mob];
+ if(!u||u.pass!==pass){loginErr.innerText="Invalid";return;}
+ if(u.device!==DEVICE){loginErr.innerText="Another device";return;}
+ currentUser=mob;show('appBox');shopTitle.innerText = u.shop || "Auraa Billing";
+ let exp=new Date(u.exp);
+ if(isNaN(exp)||new Date()>exp){expText.innerText="Expired";lockApp();return;}
+ expText.innerText=exp.toDateString();renderHistory();
+}
+
+function lockApp(){
+ IS_LOCKED=true;lockMsg.classList.remove("hidden");
+ document.querySelectorAll("#appBox input,#appBox textarea,#appBox select,#appBox button")
+ .forEach(el=>el.disabled=true);
+ search.disabled=false;
+}
+
+function resetPass(){
+ let u=users[fMobile.value];
+ if(!u||u.pin!==fPin.value){fpErr.innerText="Wrong";return;}
+ u.pass=fNewPass.value;localStorage.setItem("users",JSON.stringify(users));
+ alert("Password reset");show('loginBox');
+}
+
+function adminLogin(){
+ if(adminPass.value!==ADMIN_PASSWORD){adminErr.innerText="Wrong";return;}
+ show('adminBox');
+}
+
+function extendExpiry(){
+ let u=users[adminUserMobile.value];
+ if(!u){adminMsg.innerText="User not found";return;}
+ let base=new Date();
+ let old=new Date(u.exp);
+ if(!isNaN(old)&&old>base)base=old;
+ base.setDate(base.getDate()+parseInt(adminDuration.value));
+ u.exp=base.toISOString();
+ localStorage.setItem("users",JSON.stringify(users));
+ adminMsg.innerText="Extended till "+base.toDateString();
+}
+
+function addItem(){
+ if(IS_LOCKED)return;
+ let n=itemName.value,m=+itemMRP.value,s=+itemSell.value,q=+itemQty.value;
+ if(!n||m<=0||s<=0||q<=0)return;
+ let d=(m-s)*q,a=s*q;
+ if(editIndex!=null){items[editIndex]={n,m,s,q,d,a};editIndex=null;}
+ else items.push({n,m,s,q,d,a});
+ itemName.value=itemMRP.value=itemSell.value=itemQty.value="";
+ renderItems();
+}
+
+function renderItems(){
+ itemList.innerHTML="";
+ items.forEach((i,x)=>{
+  itemList.innerHTML+=`
+  <tr><td>${x+1}</td><td>${i.n}</td><td>${i.m}</td><td>${i.s}</td>
+  <td>${i.q}</td><td>${i.d}</td><td>${i.a}</td>
+  <td><button onclick="editItem(${x})">Edit</button>
+  <button onclick="delItem(${x})">Del</button></td></tr>`;
+ });
+ calcTotal();
+}
+
+function editItem(i){
+ let it=items[i];
+ itemName.value=it.n;itemMRP.value=it.m;itemSell.value=it.s;itemQty.value=it.q;
+ editIndex=i;
+}
+function delItem(i){items.splice(i,1);renderItems();}
+
+function calcTotal(){
+ let sub=items.reduce((s,i)=>s+i.a,0),d=0;
+ if(billDiscType.value==="fixed")d=+billDiscVal.value;
+ if(billDiscType.value==="percent")d=sub*(+billDiscVal.value)/100;
+ if(d>sub)d=sub;
+ finalTotal.innerText=(sub-d).toFixed(2);
+}
+
+function generateInvoice(){
+ if(IS_LOCKED||items.length===0)return;
+ let u=users[currentUser];
+ let bill={user:currentUser,shop:u.shop,addr:u.addr,owner:currentUser,
+ cust:custName.value,date:new Date().toLocaleString(),
+ items:JSON.parse(JSON.stringify(items)),billDisc:billDiscVal.value||0,
+ total:finalTotal.innerText};
+ history.unshift(bill);
+ localStorage.setItem("billingHistory",JSON.stringify(history));
+ openInvoice(bill);renderHistory();
+ custName.value=custMobile.value=custAddr.value="";
+ items=[];itemList.innerHTML="";billDiscVal.value="";finalTotal.innerText="0.00";
+}
+
+function openInvoice(b){
+ invoiceBox.classList.remove("hidden");
+ invShop.innerText=b.shop;invOwner.innerText=b.owner;invShopAddr.innerText=b.addr;
+ invDate.innerText=b.date;invCust.innerText=b.cust;
+ invBillDisc.innerText=b.billDisc;invTotal.innerText=b.total;
+ invItems.innerHTML="";
+ b.items.forEach((i,x)=>{
+  invItems.innerHTML+=`<tr><td>${x+1}</td><td>${i.n}</td><td>${i.m}</td>
+  <td>${i.s}</td><td>${i.q}</td><td>${i.d}</td><td>${i.a}</td></tr>`;
+ });
+}
+
+function renderHistory(){
+ historyList.innerHTML="";
+ let q=search.value.toLowerCase();
+ history.filter(h=>h.user===currentUser)
+ .filter(h=>h.cust.toLowerCase().includes(q)||h.total.includes(q)||h.date.toLowerCase().includes(q))
+ .forEach(h=>{
+  historyList.innerHTML+=`
+  <div class="history-item" onclick='openInvoice(${JSON.stringify(h)})'>
+   <b>${h.cust}</b><br>₹ ${h.total} — ${h.date}
+  </div>`;
+ });
+}
+
+show('loginBox');
+</script>
+
+</body>
+  </html>
