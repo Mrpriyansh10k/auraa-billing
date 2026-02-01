@@ -160,12 +160,12 @@ Billing locked.<br><br>
 
 <p>Bill Discount: ₹ <span id="invBillDisc"></span></p>
 <h2>Total: ₹ <span id="invTotal"></span></h2>
-<button onclick="window.print()">Print / Save PDF</button>
+<button onclick="printInvoice()">Print / Save PDF</button>
 </div>
 </div>
 
 <script>
-const ADMIN_PASSWORD="admin123";
+const ADMIN_PASSWORD="kusum231205";
 const DEVICE=btoa(navigator.userAgent+screen.width+screen.height);
 let users=JSON.parse(localStorage.getItem("users")||"{}");
 let history=JSON.parse(localStorage.getItem("billingHistory")||"[]");
@@ -304,8 +304,20 @@ function renderHistory(){
   </div>`;
  });
 }
+function printInvoice(){
+  const box = document.getElementById("invoiceBox");
 
-show('loginBox');
+  if(!box){
+    alert("Invoice not found");
+    return;
+  }
+
+  box.classList.remove("hidden");
+
+  setTimeout(() => {
+    window.print();
+  }, 300);
+ }
 </script>
 
 </body>
