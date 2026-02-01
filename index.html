@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Auraa Billing Ultra Master</title>
+    <title>Auraa Billing Ultra</title>
     <style>
         :root { --p: #2563eb; --d: #dc2626; --s: #16a34a; --drk: #1f2937; --bg: #f3f4f6; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--drk); padding-bottom: 50px; -webkit-tap-highlight-color: transparent; }
@@ -19,9 +19,8 @@
         .dash { background: var(--drk); color: white; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         .dash strong { font-size: 13px; }
         .adm-item { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #e2e8f0; font-size: 12px; color: #333; }
+        a { text-decoration: none; font-weight: bold; cursor:pointer;} 
         
-        /* Links & Print Styles */
-        a { text-decoration: none; font-weight: bold; }
         @media print { 
             body * { visibility: hidden; } 
             #p-area, #p-area * { visibility: visible; } 
@@ -41,8 +40,14 @@
             <input type="number" id="l-mob" placeholder="Mobile Number">
             <input type="password" id="l-pass" placeholder="Password">
             <button class="btn-p" onclick="login()">Login</button>
+            
+            <div style="text-align:center; margin-top:10px;">
+                <a onclick="forgotPass()" style="color:var(--p); font-size:13px;">Forgot Password?</a>
+            </div>
+            <hr>
             <button style="color:var(--p); background:none; font-size: 14px;" onclick="toggleA(true)">Register New Shop</button>
         </div>
+
         <div id="reg-box" class="card hidden">
             <input type="text" id="r-name" placeholder="Shop Name">
             <input type="text" id="r-addr" placeholder="Address">
@@ -82,16 +87,14 @@
             <input type="number" id="c-mob" placeholder="Customer Mobile">
             <div id="bill-items-list"></div>
             <button class="btn-s" style="background:#6366f1;" onclick="addBItem()">+ Add Item</button>
-            
             <div class="flex" style="margin-top:10px;">
                 <input type="number" id="b-tax" placeholder="GST %" oninput="calcTotal()" style="flex:1">
                 <select id="disc-type" onchange="calcTotal()" style="flex:1">
-                    <option value="fixed">Disc ₹ (Fixed)</option>
-                    <option value="percent">Disc % (Perc)</option>
+                    <option value="fixed">Disc ₹</option>
+                    <option value="percent">Disc %</option>
                 </select>
                 <input type="number" id="b-disc" placeholder="Value" oninput="calcTotal()" style="flex:1">
             </div>
-            
             <h2 id="b-total-view" style="text-align:center; color:var(--p); margin:15px 0;">Total: ₹0.00</h2>
             <button class="btn-p" onclick="genBill()" id="gen-bill-btn">Save & Print Bill</button>
             
@@ -124,7 +127,6 @@
             <hr>
             <input type="file" id="importFile" accept=".json">
             <button class="btn-s" onclick="restoreBackup()">Restore Backup</button>
-            
             <div style="margin-top:20px; text-align:center; background:#f0f9ff; padding:10px; border-radius:8px;">
                 <p style="margin:0 0 5px 0; font-size:12px;">Contact Developer (Priyansh):</p>
                 <div class="flex" style="justify-content:center;">
@@ -148,10 +150,10 @@
         </div>
         <button class="btn-d" style="background:black;" onclick="terminateShop()">LOCK NOW</button>
         <hr>
-        <h4>Registered Shops</h4>
+        <h4>Registered Shops (Tap 'Key' to see Pass)</h4>
         <div id="adm-shop-list"></div>
     </div>
-    <button class="btn-d" onclick="document.getElementById('adm-box').classList.add('hidden')">Close</button>
+    <button class="btn-d" onclick="document.getElementById('adm-box').classList.add('hidden')">Close Admin</button>
 </div>
 
 <div id="p-area" class="hidden">
@@ -173,7 +175,13 @@
 let shop = null; let isOwner = true; let currentBillItems = [];
 const saveShop = (s) => localStorage.setItem('shop_' + s.mobile, JSON.stringify(s));
 
-// --- 1. ADMIN LOGIC (Password Hidden) ---
+// --- FORGOT PASSWORD LOGIC ---
+function forgotPass() {
+    alert("Please contact the Admin (Priyansh) on WhatsApp to recover your password.\n\nMobile: 8000595588");
+    window.location.href = "https://wa.me/918000595588?text=Hello%20Admin,%20I%20forgot%20my%20billing%20app%20password.";
+}
+
+// --- ADMIN LOGIC (Show Pass added) ---
 function openAdmin() { document.getElementById('adm-box').classList.remove('hidden'); listShops(); }
 function listShops() {
     const list = document.getElementById('adm-shop-list'); list.innerHTML = "";
@@ -182,9 +190,17 @@ function listShops() {
         if(key.startsWith('shop_')){
             let s = JSON.parse(localStorage.getItem(key));
             let div = document.createElement('div'); div.className="adm-item";
-            div.innerHTML = `<b>${s.name}</b> (${s.mobile})<br>Exp: ${new Date(s.expiry).toLocaleDateString()}<br>
-            <div class='flex'><button class='btn-p' style='padding:4px; font-size:10px;' onclick="document.getElementById('adm-target').innerText='${s.mobile}'">Select</button>
-            <button class='btn-d' style='padding:4px; font-size:10px;' onclick="if(confirm('Delete?')){localStorage.removeItem('${key}');listShops();}">Delete</button></div>`;
+            // ADDED KEY ICON FOR PASSWORD RECOVERY
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between;">
+                    <span><b>${s.name}</b> (${s.mobile})</span>
+                    <button onclick="alert('Password: ${s.pass}\\nPIN: ${s.pin}')" style="background:#f59e0b; width:auto; padding:2px 8px; font-size:10px;">🔑</button>
+                </div>
+                Exp: ${new Date(s.expiry).toLocaleDateString()}<br>
+                <div class='flex' style="margin-top:5px;">
+                    <button class='btn-p' style='padding:4px; font-size:10px;' onclick="document.getElementById('adm-target').innerText='${s.mobile}'">Select</button>
+                    <button class='btn-d' style='padding:4px; font-size:10px;' onclick="if(confirm('Delete?')){localStorage.removeItem('${key}');listShops();}">Delete</button>
+                </div>`;
             list.appendChild(div);
         }
     }
@@ -195,78 +211,52 @@ document.getElementById('adm-pass').oninput = (e) => {
 function extend(d) { let m = document.getElementById('adm-target').innerText; if(m === "None") return alert("Select Shop"); let s = JSON.parse(localStorage.getItem('shop_'+m)); s.expiry = (s.expiry > Date.now() ? s.expiry : Date.now()) + (d*86400000); saveShop(s); alert("Extended!"); listShops(); }
 function terminateShop() { let m = document.getElementById('adm-target').innerText; if(m === "None") return alert("Select Shop"); let s = JSON.parse(localStorage.getItem('shop_'+m)); s.expiry = Date.now() - 1000; saveShop(s); alert("Locked!"); listShops(); }
 
-// --- 2. AUTHENTICATION & UNIQUE ID ---
+// --- AUTH & MAIN ---
 function register() {
     const m = document.getElementById('r-mob').value; if(!m) return alert("Enter Mobile");
-    if(localStorage.getItem('shop_' + m)) return alert("Account Exists! Please Login.");
+    if(localStorage.getItem('shop_' + m)) return alert("Account Exists! Login.");
     const data = { name: document.getElementById('r-name').value, address: document.getElementById('r-addr').value, mobile: m, pass: document.getElementById('r-pass').value, pin: document.getElementById('r-pin').value, expiry: Date.now() + (7*86400000), history: [], stock: [] };
     saveShop(data); alert("Success!"); toggleA(false);
 }
-function login() { const m = document.getElementById('l-mob').value; const s = JSON.parse(localStorage.getItem('shop_'+m)); if(s && s.pass === document.getElementById('l-pass').value){ shop = s; showApp(); } else alert("Invalid Credentials"); }
-
-// --- 3. MAIN APP & TABS ---
+function login() { const m = document.getElementById('l-mob').value; const s = JSON.parse(localStorage.getItem('shop_'+m)); if(s && s.pass === document.getElementById('l-pass').value){ shop = s; showApp(); } else alert("Invalid"); }
 function showApp() { 
     document.getElementById('auth-sec').classList.add('hidden'); 
     document.getElementById('app-sec').classList.remove('hidden'); 
     document.getElementById('shop-head').innerText = shop.name;
-    // Login -> Default Owner Mode
     isOwner = true;
     document.querySelectorAll('.owner-only').forEach(el => el.classList.remove('hidden'));
     document.getElementById('lock-btn').innerText = "Switch to Staff";
     updateDash(); renderStock(); renderH(); 
 }
-function showTab(t) { 
-    document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden')); 
-    document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('tab-active')); 
-    document.getElementById('tab-'+t).classList.remove('hidden'); 
-    document.getElementById('t-'+t).classList.add('tab-active'); 
-    if(t==='history') renderH();
-}
+function showTab(t) { document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('tab-active')); document.getElementById('tab-'+t).classList.remove('hidden'); document.getElementById('t-'+t).classList.add('tab-active'); if(t==='history') renderH();}
 
-// --- 4. STAFF/OWNER TOGGLE ---
+// --- STAFF MODE ---
 function toggleStaffMode() {
     if(isOwner) {
-        // Go to Staff
-        isOwner = false;
-        document.querySelectorAll('.owner-only').forEach(el => el.classList.add('hidden'));
-        document.getElementById('lock-btn').innerText = "Unlock Admin";
-        document.getElementById('lock-btn').style.background = "#dc2626";
-        showTab('bill');
-        alert("Staff Mode Enabled");
+        isOwner = false; document.querySelectorAll('.owner-only').forEach(el => el.classList.add('hidden'));
+        document.getElementById('lock-btn').innerText = "Unlock Admin"; document.getElementById('lock-btn').style.background = "#dc2626";
+        showTab('bill'); alert("Staff Mode Enabled");
     } else {
-        // Go to Owner
         if(prompt("Enter Owner PIN:") === shop.pin) {
-            isOwner = true;
-            document.querySelectorAll('.owner-only').forEach(el => el.classList.remove('hidden'));
-            document.getElementById('lock-btn').innerText = "Switch to Staff";
-            document.getElementById('lock-btn').style.background = "#4b5563";
-            alert("Welcome Back Owner!");
-        } else {
-            alert("Wrong PIN!");
-        }
+            isOwner = true; document.querySelectorAll('.owner-only').forEach(el => el.classList.remove('hidden'));
+            document.getElementById('lock-btn').innerText = "Switch to Staff"; document.getElementById('lock-btn').style.background = "#4b5563";
+            alert("Owner Mode Unlocked!");
+        } else { alert("Wrong PIN!"); }
     }
 }
 
-// --- 5. STOCK (Auto-Clear) ---
+// --- STOCK & BILL ---
 function addStock() {
-    const n = document.getElementById('s-name').value.trim(); 
-    const q = parseFloat(document.getElementById('s-qty').value)||0; 
-    const p = parseFloat(document.getElementById('s-price').value)||0;
+    const n = document.getElementById('s-name').value.trim(); const q = parseFloat(document.getElementById('s-qty').value)||0; const p = parseFloat(document.getElementById('s-price').value)||0;
     if(!n || q <= 0) return alert("Fill Details");
-    
     const ex = shop.stock.find(i=>i.name.toLowerCase() === n.toLowerCase());
     if(ex){ ex.qty += q; ex.price = p; } else shop.stock.push({name:n, qty:q, price:p});
     saveShop(shop); renderStock(); 
-    
-    // Auto Clear Inputs
-    document.getElementById('s-name').value=''; 
-    document.getElementById('s-qty').value=''; 
-    document.getElementById('s-price').value=''; 
+    document.getElementById('s-name').value=''; document.getElementById('s-qty').value=''; document.getElementById('s-price').value=''; 
     alert("Updated!");
 }
 function renderStock() { document.getElementById('stock-display').innerHTML = shop.stock.map((i,idx)=>`<div class='card flex'><span><b>${i.name}</b> (${i.qty})</span><b>₹${i.price}</b><button class='btn-d' style='width:auto; padding:5px;' onclick='shop.stock.splice(${idx},1);saveShop(shop);renderStock();'>X</button></div>`).join(''); }
 
-// --- 6. BILLING (Calc, GST, Discount) ---
 function addBItem() { currentBillItems.push({name:'', qty:1, price:0}); renderBItems(); }
 function updateItem(idx, key, val) {
     currentBillItems[idx][key] = val;
@@ -283,13 +273,9 @@ function renderBItems() {
 }
 function calcTotal() {
     let sub = 0; currentBillItems.forEach(i=>sub+=(i.qty*i.price));
-    const t = parseFloat(document.getElementById('b-tax').value)||0; 
-    const dVal = parseFloat(document.getElementById('b-disc').value)||0;
+    const t = parseFloat(document.getElementById('b-tax').value)||0; const dVal = parseFloat(document.getElementById('b-disc').value)||0;
     const dType = document.getElementById('disc-type').value;
-    
-    let taxAmt = (sub * t / 100); 
-    let discAmt = (dType === 'percent') ? (sub * dVal / 100) : dVal;
-    
+    let taxAmt = (sub * t / 100); let discAmt = (dType === 'percent') ? (sub * dVal / 100) : dVal;
     const final = sub + taxAmt - discAmt;
     document.getElementById('b-total-view').innerText = "Total: ₹" + Math.max(0, final).toFixed(2);
     return { sub, taxAmt, discAmt, final: Math.max(0, final) };
@@ -309,15 +295,8 @@ function printInv(inv) {
     setTimeout(() => { window.print(); resetBill(); }, 600);
 }
 
-// --- 7. RESET & MISC ---
-function resetBill() { 
-    currentBillItems=[]; 
-    document.getElementById('c-name').value=''; 
-    document.getElementById('c-mob').value=''; 
-    document.getElementById('b-tax').value=''; 
-    document.getElementById('b-disc').value=''; 
-    renderBItems(); calcTotal(); updateDash(); renderStock(); renderH(); 
-}
+// --- RESET & BACKUP ---
+function resetBill() { currentBillItems=[]; document.getElementById('c-name').value=''; document.getElementById('c-mob').value=''; document.getElementById('b-tax').value=''; document.getElementById('b-disc').value=''; renderBItems(); calcTotal(); updateDash(); renderStock(); renderH(); }
 function updateDash() { let bills = shop.history.filter(h=>h.date.includes(new Date().toLocaleDateString())); document.getElementById('d-sale').innerText = "₹"+bills.reduce((s,h)=>s+h.final,0).toFixed(0); document.getElementById('d-count').innerText = bills.length; let days = Math.ceil((shop.expiry - Date.now())/86400000); document.getElementById('d-exp').innerText = days <= 0 ? "Expired" : days + "D"; if(days<=0){document.getElementById('gen-bill-btn').disabled=true; document.getElementById('exp-msg').classList.remove('hidden');} }
 function renderH() { let q = document.getElementById('h-search').value.toLowerCase(); document.getElementById('h-list').innerHTML = shop.history.filter(h=>h.cust.toLowerCase().includes(q)).reverse().map(h=>`<div class='card' onclick='printInv(${JSON.stringify(h)})' style='cursor:pointer; border-left:5px solid var(--p)'><b>${h.cust}</b> <span style="float:right">₹${h.final}</span><br><small>${h.date}</small></div>`).join(''); }
 function downloadBackup() { const blob = new Blob([JSON.stringify(shop)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download=`Auraa_Backup.json`; a.click(); }
