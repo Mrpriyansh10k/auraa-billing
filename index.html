@@ -1,187 +1,158 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Auraa Billing</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- PDF LIB -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{font-family:Arial;background:#f2f2f2;margin:0}
-.box{background:#fff;margin:10px;padding:12px;border-radius:6px}
-input,select,button{width:100%;padding:8px;margin:4px 0}
-button{background:#2f4c9c;color:#fff;border:none;border-radius:4px}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #000;padding:6px;font-size:13px;text-align:center}
+body{
+  font-family: Arial;
+  background:#f2f2f2;
+  margin:0;
+  padding:10px;
+}
+.box{
+  background:#fff;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:12px;
+}
 .hidden{display:none}
+input,textarea,select,button{
+  width:100%;
+  padding:8px;
+  margin-top:6px;
+}
+button{
+  background:#1e3a8a;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th,td{
+  border:1px solid #ccc;
+  padding:6px;
+  font-size:12px;
+  text-align:center;
+}
+th{background:#e5e7eb}
 
-/* PDF STYLE */
-.pdf{background:#fff;padding:20px}
-.pdf h2{text-align:center;margin:0}
-.pdf small{text-align:center;display:block}
+/* 🔥 THERMAL PRINT */
+@media print{
+  body{width:58mm;margin:0;font-size:12px;background:#fff}
+  button{display:none}
+  .box{box-shadow:none}
+}
 </style>
 </head>
 
 <body>
 
-<!-- SHOP -->
-<div class="box">
-<h3>Shop Details</h3>
-<input id="shopName" placeholder="Shop Name">
-<input id="ownerName" placeholder="Owner Name">
-<input id="shopAddr" placeholder="Shop Address">
-</div>
-
-<!-- CUSTOMER -->
 <div class="box">
 <h3>Customer</h3>
 <input id="custName" placeholder="Customer Name">
-<input id="custMobile" placeholder="Customer Mobile">
+<input id="custMobile" placeholder="Mobile">
 </div>
 
-<!-- ITEMS -->
 <div class="box">
 <h3>Add Item</h3>
-<input id="iName" placeholder="Item Name">
-<input id="iMRP" placeholder="MRP">
-<input id="iPrice" placeholder="Selling Price">
-<input id="iQty" placeholder="Qty">
+<input id="itemName" placeholder="Item">
+<input id="itemPrice" type="number" placeholder="Price">
+<input id="itemQty" type="number" placeholder="Qty">
 <button onclick="addItem()">Add Item</button>
+</div>
 
+<div class="box">
 <table>
 <thead>
-<tr>
-<th>#</th><th>Item</th><th>MRP</th><th>Price</th>
-<th>Qty</th><th>Disc</th><th>Amt</th><th>X</th>
-</tr>
+<tr><th>#</th><th>Item</th><th>Price</th><th>Qty</th><th>Amt</th></tr>
 </thead>
-<tbody id="itemTable"></tbody>
+<tbody id="itemList"></tbody>
 </table>
 </div>
 
-<!-- BILL DISCOUNT -->
 <div class="box">
-<h3>Bill Discount</h3>
-<input id="billDiscVal" placeholder="Discount value">
-<select id="billDiscType">
-<option value="amount">Amount ₹</option>
-<option value="percent">Percent %</option>
-</select>
+<h3>Total: ₹ <span id="finalTotal">0</span></h3>
 <button onclick="generateInvoice()">Generate Invoice</button>
 </div>
 
 <!-- INVOICE -->
-<div id="invoice" class="box hidden pdf">
-<h2>Auraa Billing</h2>
-<small>Invoice</small>
-
-<p><b>Shop:</b> <span id="pShop"></span></p>
-<p><b>Owner:</b> <span id="pOwner"></span></p>
-<p><b>Address:</b> <span id="pAddr"></span></p>
-<p><b>Date:</b> <span id="pDate"></span></p>
-<p><b>Customer:</b> <span id="pCust"></span></p>
+<div class="box hidden" id="invoiceBox">
+<h3>Invoice</h3>
+<p><b>Owner:</b> Priyansh Mehta</p>
+<p><b>Address:</b> Dungarpur</p>
+<p><b>Date:</b> <span id="invDate"></span></p>
+<p><b>Customer:</b> <span id="invCust"></span></p>
 
 <table>
 <thead>
-<tr>
-<th>#</th><th>Item</th><th>MRP</th>
-<th>Price</th><th>Qty</th><th>Disc</th><th>Amt</th>
-</tr>
+<tr><th>#</th><th>Item</th><th>Price</th><th>Qty</th><th>Amt</th></tr>
 </thead>
-<tbody id="pItems"></tbody>
+<tbody id="invItems"></tbody>
 </table>
 
-<p>Bill Discount: ₹ <span id="pBillDisc"></span></p>
-<h3>Total: ₹ <span id="pTotal"></span></h3>
+<h3>Total ₹ <span id="invTotal"></span></h3>
 
-<button onclick="downloadPDF()">Download PDF</button>
+<button onclick="printInvoice()">Download PDF</button>
+<button onclick="shareWhatsApp()">WhatsApp</button>
 </div>
 
 <script>
 let items=[];
 
-/* ADD ITEM */
 function addItem(){
-  let n=iName.value;
-  let m=+iMRP.value;
-  let p=+iPrice.value;
-  let q=+iQty.value;
-  if(!n||!m||!p||!q) return;
-
-  let disc=(m-p)*q;
-  let amt=p*q;
-
-  items.push({n,m,p,q,disc,amt});
-  renderItems();
-
-  iName.value=iMRP.value=iPrice.value=iQty.value="";
+  let n=itemName.value;
+  let p=+itemPrice.value;
+  let q=+itemQty.value;
+  if(!n||!p||!q)return;
+  items.push({n,p,q,a:p*q});
+  render();
+  itemName.value=itemPrice.value=itemQty.value="";
 }
 
-function renderItems(){
-  itemTable.innerHTML="";
-  items.forEach((it,i)=>{
-    itemTable.innerHTML+=`
-    <tr>
-      <td>${i+1}</td>
-      <td>${it.n}</td>
-      <td>${it.m}</td>
-      <td>${it.p}</td>
-      <td>${it.q}</td>
-      <td>${it.disc}</td>
-      <td>${it.amt}</td>
-      <td><button onclick="delItem(${i})">❌</button></td>
+function render(){
+  itemList.innerHTML="";
+  let t=0;
+  items.forEach((i,x)=>{
+    t+=i.a;
+    itemList.innerHTML+=`<tr>
+    <td>${x+1}</td><td>${i.n}</td><td>${i.p}</td><td>${i.q}</td><td>${i.a}</td>
     </tr>`;
   });
+  finalTotal.innerText=t;
 }
 
-function delItem(i){
-  items.splice(i,1);
-  renderItems();
-}
-
-/* INVOICE */
 function generateInvoice(){
-  pShop.textContent=shopName.value;
-  pOwner.textContent=ownerName.value;
-  pAddr.textContent=shopAddr.value;
-  pCust.textContent=custName.value;
-  pDate.textContent=new Date().toLocaleDateString();
-
-  let total=0;
-  pItems.innerHTML="";
-  items.forEach((it,i)=>{
-    total+=it.amt;
-    pItems.innerHTML+=`
-    <tr>
-      <td>${i+1}</td>
-      <td>${it.n}</td>
-      <td>${it.m}</td>
-      <td>${it.p}</td>
-      <td>${it.q}</td>
-      <td>${it.disc}</td>
-      <td>${it.amt}</td>
+  if(items.length==0)return;
+  invoiceBox.classList.remove("hidden");
+  invCust.innerText=custName.value;
+  invDate.innerText=new Date().toLocaleDateString();
+  invTotal.innerText=finalTotal.innerText;
+  invItems.innerHTML="";
+  items.forEach((i,x)=>{
+    invItems.innerHTML+=`<tr>
+    <td>${x+1}</td><td>${i.n}</td><td>${i.p}</td><td>${i.q}</td><td>${i.a}</td>
     </tr>`;
   });
-
-  let bd=+billDiscVal.value||0;
-  if(billDiscType.value=="percent") bd=total*bd/100;
-
-  pBillDisc.textContent=bd;
-  pTotal.textContent=total-bd;
-
-  invoice.classList.remove("hidden");
-
-  /* AUTO RESET */
-  items=[];
-  itemTable.innerHTML="";
-  custName.value=custMobile.value="";
 }
 
-/* PDF */
-function downloadPDF(){
-  html2pdf().from(invoice).save("Auraa_Invoice.pdf");
+function printInvoice(){
+  let name=invCust.innerText||"invoice";
+  document.title=name.replace(/[^a-zA-Z0-9]/g,"_")+".pdf";
+  setTimeout(()=>window.print(),300);
+}
+
+function shareWhatsApp(){
+  let msg=`Invoice Ready
+Customer: ${invCust.innerText}
+Total: ₹${invTotal.innerText}`;
+  window.open("https://wa.me/?text="+encodeURIComponent(msg));
 }
 </script>
 
