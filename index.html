@@ -1,160 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Auraa Billing</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-body{
-  font-family: Arial;
-  background:#f2f2f2;
-  margin:0;
-  padding:10px;
-}
-.box{
-  background:#fff;
-  padding:12px;
-  border-radius:8px;
-  margin-bottom:12px;
-}
-.hidden{display:none}
-input,textarea,select,button{
-  width:100%;
-  padding:8px;
-  margin-top:6px;
-}
-button{
-  background:#1e3a8a;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
-th,td{
-  border:1px solid #ccc;
-  padding:6px;
-  font-size:12px;
-  text-align:center;
-}
-th{background:#e5e7eb}
-
-/* 🔥 THERMAL PRINT */
-@media print{
-  body{width:58mm;margin:0;font-size:12px;background:#fff}
-  button{display:none}
-  .box{box-shadow:none}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Auraa Billing Ultra Master</title>
+    <style>
+        :root { --p: #2563eb; --d: #dc2626; --s: #16a34a; --drk: #1f2937; --bg: #f3f4f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--drk); padding-bottom: 50px; -webkit-tap-highlight-color: transparent; }
+        .container { max-width: 500px; margin: 0 auto; padding: 15px; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-size: 14px; }
+        .btn-p { background: var(--p); } .btn-s { background: var(--s); } .btn-d { background: var(--d); }
+        .hidden { display: none !important; }
+        .flex { display: flex; gap: 8px; align-items: center; }
+        .tab-btn { background: #6b7280; flex: 1; padding: 10px; font-size: 13px; border-radius: 8px; }
+        .tab-active { background: var(--p) !important; }
+        .dash { background: var(--drk); color: white; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+        .dash strong { font-size: 13px; }
+        .adm-item { background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #e2e8f0; font-size: 12px; }
+        
+        @media print { 
+            body * { visibility: hidden; } 
+            #p-area, #p-area * { visibility: visible; } 
+            #p-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; background: white; color: black; } 
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid black; }
+            th, td { border: 1px solid black !important; padding: 8px; text-align: left; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="box">
-<h3>Customer</h3>
-<input id="custName" placeholder="Customer Name">
-<input id="custMobile" placeholder="Mobile">
+<div class="container no-print">
+    <div id="auth-sec">
+        <center><h2 style="color:var(--p)">AURAA BILLING ULTRA</h2></center>
+        <div id="login-box" class="card">
+            <input type="number" id="l-mob" placeholder="Mobile Number">
+            <input type="password" id="l-pass" placeholder="Password">
+            <button class="btn-p" onclick="login()">Login</button>
+            <button style="color:var(--p); background:none;" onclick="toggleA(true)">Register New Shop</button>
+        </div>
+        <div id="reg-box" class="card hidden">
+            <input type="text" id="r-name" placeholder="Shop Name">
+            <input type="text" id="r-addr" placeholder="Address">
+            <input type="number" id="r-mob" placeholder="Mobile">
+            <input type="password" id="r-pass" placeholder="Password">
+            <input type="number" id="r-pin" placeholder="Owner PIN (For Lock/Unlock)">
+            <button class="btn-s" onclick="register()">Create Account</button>
+            <button style="color:var(--p); background:none;" onclick="toggleA(false)">Back</button>
+            <button class="btn-p" style="background:#4b5563; margin-top:20px;" onclick="openAdmin()">Admin Master Control</button>
+        </div>
+    </div>
+
+    <div id="app-sec" class="hidden">
+        <div class="flex" style="justify-content:space-between; margin-bottom:10px;">
+            <strong id="shop-head">Shop</strong>
+            <div class="flex">
+                <button id="lock-btn" class="btn-p" style="width:auto; padding:5px 10px; background:#4b5563; font-size:11px;" onclick="toggleStaffMode()">Owner Mode</button>
+                <button class="btn-d" style="width:auto; padding:5px 10px; font-size:11px;" onclick="location.reload()">Logout</button>
+            </div>
+        </div>
+
+        <div class="dash">
+            <div><small>Today Sale</small><br><strong id="d-sale">₹0</strong></div>
+            <div><small>Invoices</small><br><strong id="d-count">0</strong></div>
+            <div><small>Expires</small><br><strong id="d-exp">--</strong></div>
+        </div>
+
+        <div class="flex no-print" style="margin-bottom:10px;">
+            <button id="t-bill" class="tab-btn tab-active" onclick="showTab('bill')">Bill</button>
+            <button id="t-stock" class="tab-btn owner-only" onclick="showTab('stock')">Stock</button>
+            <button id="t-history" class="tab-btn owner-only" onclick="showTab('history')">History</button>
+            <button id="t-set" class="tab-btn owner-only" onclick="showTab('set')">⚙️</button>
+        </div>
+
+        <div id="tab-bill" class="tab-content card">
+            <input type="text" id="c-name" placeholder="Customer Name">
+            <input type="number" id="c-mob" placeholder="Mobile Number">
+            <div id="bill-items-list"></div>
+            <button class="btn-s" onclick="addBItem()">+ Add Item</button>
+            <div class="flex">
+                <input type="number" id="b-tax" placeholder="GST %" oninput="calcTotal()">
+                <input type="number" id="b-disc" placeholder="Disc ₹" oninput="calcTotal()">
+            </div>
+            <h2 id="b-total-view" style="text-align:center; color:var(--p); margin:10px 0;">Total: ₹0.00</h2>
+            <button class="btn-p" onclick="genBill()" id="gen-bill-btn">Save & Print Bill</button>
+            <center id="exp-msg" class="hidden" style="color:var(--d); font-size:11px; margin-top:10px; font-weight:bold;">WhatsApp: 8000595588 | @mr_priyansh_10k</center>
+        </div>
+
+        <div id="tab-stock" class="tab-content card hidden owner-only">
+            <h4>Inventory</h4>
+            <input type="text" id="s-name" placeholder="Item Name">
+            <div class="flex"><input type="number" id="s-qty" placeholder="Qty"><input type="number" id="s-price" placeholder="Price"></div>
+            <button class="btn-s" onclick="addStock()">Update Stock</button>
+            <div id="stock-display"></div>
+        </div>
+
+        <div id="tab-history" class="tab-content hidden owner-only">
+            <div id="m-report" style="background:#eff6ff; padding:10px; border-radius:8px; font-size:12px; margin-bottom:10px;"></div>
+            <div class="card"><input type="text" id="h-search" placeholder="Search Invoices..." oninput="renderH()"><div id="h-list"></div></div>
+        </div>
+
+        <div id="tab-set" class="tab-content hidden owner-only">
+            <div class="card">
+                <h4>Cloud Backup</h4>
+                <button class="btn-p" onclick="downloadBackup()">Download Backup (.json)</button>
+                <hr>
+                <input type="file" id="importFile" accept=".json">
+                <button class="btn-s" onclick="restoreBackup()">Upload & Restore</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="box">
-<h3>Add Item</h3>
-<input id="itemName" placeholder="Item">
-<input id="itemPrice" type="number" placeholder="Price">
-<input id="itemQty" type="number" placeholder="Qty">
-<button onclick="addItem()">Add Item</button>
+<div id="adm-box" class="card hidden" style="position:fixed; top:5%; left:5%; right:5%; z-index:999; border:2px solid black; max-height:85vh; overflow-y:auto;">
+    <h3>Admin Master Control</h3>
+    <input type="password" id="adm-pass" placeholder="Enter Admin Password">
+    <div id="adm-ctrl" class="hidden">
+        <div style="background:#fff3e0; padding:10px; border-radius:8px; margin-bottom:10px; font-size:12px;">Selected: <b id="adm-target">None</b></div>
+        <div class="flex">
+            <button class="btn-s" onclick="extend(7)">+7D</button>
+            <button class="btn-s" onclick="extend(30)">+30D</button>
+            <button class="btn-s" onclick="extend(365)">+1Y</button>
+        </div>
+        <button class="btn-d" style="background:black;" onclick="terminateShop()">EXPIRE / LOCK NOW</button>
+        <hr>
+        <h4>Registered Shops</h4>
+        <div id="adm-shop-list"></div>
+    </div>
+    <button class="btn-d" onclick="this.parentElement.classList.add('hidden')">Close Admin</button>
 </div>
 
-<div class="box">
-<table>
-<thead>
-<tr><th>#</th><th>Item</th><th>Price</th><th>Qty</th><th>Amt</th></tr>
-</thead>
-<tbody id="itemList"></tbody>
-</table>
-</div>
-
-<div class="box">
-<h3>Total: ₹ <span id="finalTotal">0</span></h3>
-<button onclick="generateInvoice()">Generate Invoice</button>
-</div>
-
-<!-- INVOICE -->
-<div class="box hidden" id="invoiceBox">
-<h3>Invoice</h3>
-<p><b>Owner:</b> Priyansh Mehta</p>
-<p><b>Address:</b> Dungarpur</p>
-<p><b>Date:</b> <span id="invDate"></span></p>
-<p><b>Customer:</b> <span id="invCust"></span></p>
-
-<table>
-<thead>
-<tr><th>#</th><th>Item</th><th>Price</th><th>Qty</th><th>Amt</th></tr>
-</thead>
-<tbody id="invItems"></tbody>
-</table>
-
-<h3>Total ₹ <span id="invTotal"></span></h3>
-
-<button onclick="printInvoice()">Download PDF</button>
-<button onclick="shareWhatsApp()">WhatsApp</button>
+<div id="p-area" class="hidden" style="padding:20px; color:black; background:white;">
+    <center><h2 id="p-sname"></h2><p id="p-saddr"></p><hr><strong>TAX INVOICE</strong></center>
+    <div style="font-size:12px; margin:10px 0;">Date: <span id="p-date"></span><br>Cust: <span id="p-cname"></span> | <span id="p-cmob"></span></div>
+    <table style="width:100%;">
+        <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+        <tbody id="p-body"></tbody>
+    </table>
+    <div style="text-align:right; margin-top:10px;">
+        <p>Tax: ₹<span id="p-tax"></span> | Disc: ₹<span id="p-disc"></span></p>
+        <h3 style="border-top:1px dashed black; padding-top:5px;">Grand Total: ₹<span id="p-total"></span></h3>
+    </div>
 </div>
 
 <script>
-let items=[];
+let shop = null; let isOwner = true; let currentBillItems = [];
+const saveShop = (s) => localStorage.setItem('shop_' + s.mobile, JSON.stringify(s));
 
-function addItem(){
-  let n=itemName.value;
-  let p=+itemPrice.value;
-  let q=+itemQty.value;
-  if(!n||!p||!q)return;
-  items.push({n,p,q,a:p*q});
-  render();
-  itemName.value=itemPrice.value=itemQty.value="";
+// Admin Master Functions
+function openAdmin() { document.getElementById('adm-box').classList.remove('hidden'); listShops(); }
+function listShops() {
+    const list = document.getElementById('adm-shop-list'); list.innerHTML = "";
+    for(let i=0; i<localStorage.length; i++){
+        let key = localStorage.key(i);
+        if(key.startsWith('shop_')){
+            let s = JSON.parse(localStorage.getItem(key));
+            let div = document.createElement('div'); div.className="adm-item";
+            div.innerHTML = `<b>${s.name}</b> (${s.mobile})<br>Exp: ${new Date(s.expiry).toLocaleDateString()}<br>
+            <div class='flex'><button class='btn-p' style='padding:4px' onclick="document.getElementById('adm-target').innerText='${s.mobile}'">Select</button>
+            <button class='btn-d' style='padding:4px' onclick="if(confirm('Delete?')){localStorage.removeItem('${key}');listShops();}">Delete</button></div>`;
+            list.appendChild(div);
+        }
+    }
+}
+document.getElementById('adm-pass').oninput = (e) => { if(e.target.value === "kusum231205") document.getElementById('adm-ctrl').classList.remove('hidden'); };
+function extend(d) {
+    let m = document.getElementById('adm-target').innerText; if(m === "None") return alert("Select Shop");
+    let s = JSON.parse(localStorage.getItem('shop_'+m)); s.expiry = (s.expiry > Date.now() ? s.expiry : Date.now()) + (d*86400000);
+    saveShop(s); alert("Extended!"); listShops();
+}
+function terminateShop() {
+    let m = document.getElementById('adm-target').innerText; if(m === "None") return alert("Select Shop");
+    let s = JSON.parse(localStorage.getItem('shop_'+m)); s.expiry = Date.now() - 1000;
+    saveShop(s); alert("Locked!"); listShops();
 }
 
-function render(){
-  itemList.innerHTML="";
-  let t=0;
-  items.forEach((i,x)=>{
-    t+=i.a;
-    itemList.innerHTML+=`<tr>
-    <td>${x+1}</td><td>${i.n}</td><td>${i.p}</td><td>${i.q}</td><td>${i.a}</td>
-    </tr>`;
-  });
-  finalTotal.innerText=t;
+// Staff/Owner Mode Toggle
+function toggleStaffMode() {
+    if(isOwner){
+        isOwner = false; document.querySelectorAll('.owner-only').forEach(el=>el.classList.add('hidden'));
+        document.getElementById('lock-btn').innerText = "Unlock Owner"; showTab('bill');
+    } else {
+        if(prompt("Enter PIN:") === shop.pin){
+            isOwner = true; document.querySelectorAll('.owner-only').forEach(el=>el.classList.remove('hidden'));
+            document.getElementById('lock-btn').innerText = "Lock Owner";
+        } else alert("Wrong PIN");
+    }
 }
 
-function generateInvoice(){
-  if(items.length==0)return;
-  invoiceBox.classList.remove("hidden");
-  invCust.innerText=custName.value;
-  invDate.innerText=new Date().toLocaleDateString();
-  invTotal.innerText=finalTotal.innerText;
-  invItems.innerHTML="";
-  items.forEach((i,x)=>{
-    invItems.innerHTML+=`<tr>
-    <td>${x+1}</td><td>${i.n}</td><td>${i.p}</td><td>${i.q}</td><td>${i.a}</td>
-    </tr>`;
-  });
+// Auth Logic
+function toggleA(r) { document.getElementById('login-box').classList.toggle('hidden', r); document.getElementById('reg-box').classList.toggle('hidden', !r); }
+function register() {
+    const m = document.getElementById('r-mob').value; if(!m) return;
+    const data = { name: document.getElementById('r-name').value, address: document.getElementById('r-addr').value, mobile: m, pass: document.getElementById('r-pass').value, pin: document.getElementById('r-pin').value, expiry: Date.now() + (7*86400000), history: [], stock: [] };
+    saveShop(data); alert("Success!"); toggleA(false);
+}
+function login() {
+    const m = document.getElementById('l-mob').value; const s = JSON.parse(localStorage.getItem('shop_'+m));
+    if(s && s.pass === document.getElementById('l-pass').value){ shop = s; showApp(); } else alert("Invalid Login");
+}
+function showApp() { document.getElementById('auth-sec').classList.add('hidden'); document.getElementById('app-sec').classList.remove('hidden'); document.getElementById('shop-head').innerText = shop.name; updateDash(); renderStock(); renderH(); }
+function updateDash() {
+    const t = new Date().toLocaleDateString(); const bills = shop.history.filter(h=>h.date.includes(t));
+    document.getElementById('d-sale').innerText = "₹" + bills.reduce((s,h)=>s+(parseFloat(h.fin)||0),0).toFixed(0);
+    document.getElementById('d-count').innerText = bills.length;
+    const days = Math.ceil((shop.expiry - Date.now())/86400000);
+    document.getElementById('d-exp').innerText = days <= 0 ? "Expired" : days + "D";
+    if(days <= 0){ document.getElementById('gen-bill-btn').disabled = true; document.getElementById('exp-msg').classList.remove('hidden'); }
+}
+function showTab(t) { document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('tab-active')); document.getElementById('tab-'+t).classList.remove('hidden'); document.getElementById('t-'+t).classList.add('tab-active'); }
+
+// Stock Logic
+function addStock() {
+    const n = document.getElementById('s-name').value.trim();
+    const q = parseFloat(document.getElementById('s-qty').value)||0;
+    const p = parseFloat(document.getElementById('s-price').value)||0;
+    if(!n || q <= 0) return alert("Fill Name & Qty");
+    const ex = shop.stock.find(i=>i.name.toLowerCase() === n.toLowerCase());
+    if(ex){ ex.qty += q; ex.price = p; } else shop.stock.push({name:n, qty:q, price:p});
+    saveShop(shop); renderStock(); 
+    document.getElementById('s-name').value=''; document.getElementById('s-qty').value=''; document.getElementById('s-price').value='';
+}
+function renderStock() { document.getElementById('stock-display').innerHTML = shop.stock.map((i,idx)=>`<div class='card flex'><span><b>${i.name}</b> (Qty: ${i.qty})</span><b>₹${i.price}</b><button class='btn-d' style='width:auto; padding:5px;' onclick='shop.stock.splice(${idx},1);saveShop(shop);renderStock();'>X</button></div>`).join(''); }
+
+// Billing System
+function addBItem() { currentBillItems.push({name:'', qty:1, price:0}); renderBItems(); }
+
+function updateItem(idx, key, val) {
+    currentBillItems[idx][key] = val;
+    if(key === 'name') {
+        const s = shop.stock.find(i => i.name.toLowerCase() === val.toLowerCase().trim());
+        if(s) { 
+            currentBillItems[idx].price = s.price;
+            renderBItems(); // Refresh for auto-price
+        }
+    }
+    calcTotal();
 }
 
-function printInvoice(){
-  let name=invCust.innerText||"invoice";
-  document.title=name.replace(/[^a-zA-Z0-9]/g,"_")+".pdf";
-  setTimeout(()=>window.print(),300);
+function renderBItems() { 
+    document.getElementById('bill-items-list').innerHTML = currentBillItems.map((it, idx) => `
+    <div class='flex' style="margin-bottom:10px;">
+        <input list='stk-list' value='${it.name}' oninput='updateItem(${idx}, "name", this.value)' placeholder='Item'>
+        <input type='number' value='${it.qty}' oninput='updateItem(${idx}, "qty", parseFloat(this.value)||0)' placeholder='Qty'>
+        <input type='number' value='${it.price}' oninput='updateItem(${idx}, "price", parseFloat(this.value)||0)' placeholder='Price'>
+    </div>`).join('') + `<datalist id='stk-list'>${shop.stock.map(s=>`<option value='${s.name}'>`).join('')}</datalist>`;
 }
 
-function shareWhatsApp(){
-  let msg=`Invoice Ready
-Customer: ${invCust.innerText}
-Total: ₹${invTotal.innerText}`;
-  window.open("https://wa.me/?text="+encodeURIComponent(msg));
+function calcTotal() {
+    let sub = 0; currentBillItems.forEach(i=>sub+=( (parseFloat(i.qty)||0) * (parseFloat(i.price)||0) ));
+    const t = parseFloat(document.getElementById('b-tax').value)||0, d = parseFloat(document.getElementById('b-disc').value)||0;
+    const fin = sub + (sub*t/100) - d;
+    document.getElementById('b-total-view').innerText = "Total: ₹" + (fin||0).toFixed(2);
+    return {fin: (fin||0), tax:(sub*t/100), disc:d};
 }
+
+function genBill() {
+    const res = calcTotal(); if(currentBillItems.length === 0) return alert("Add items!");
+    
+    // STOCK DEDUCT LOGIC
+    for(let bi of currentBillItems) {
+        let si = shop.stock.find(s => s.name.toLowerCase() === bi.name.toLowerCase().trim());
+        if(si) {
+            if(si.qty < bi.qty) return alert("Not enough stock for " + si.name);
+            si.qty -= bi.qty;
+        }
+    }
+    
+    const inv = { id:Date.now(), cust:document.getElementById('c-name').value||"Cash", mob:document.getElementById('c-mob').value||"N/A", items:JSON.parse(JSON.stringify(currentBillItems)), ...res, date:new Date().toLocaleString() };
+    shop.history.push(inv); saveShop(shop); printInv(inv);
+}
+
+function printInv(inv) {
+    document.getElementById('p-sname').innerText = shop.name; document.getElementById('p-saddr').innerText = shop.address;
+    document.getElementById('p-cname').innerText = inv.cust; document.getElementById('p-cmob').innerText = inv.mob; document.getElementById('p-date').innerText = inv.date;
+    document.getElementById('p-body').innerHTML = inv.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${i.price}</td><td>${(i.qty*i.price).toFixed(2)}</td></tr>`).join('');
+    document.getElementById('p-tax').innerText = inv.tax.toFixed(2); document.getElementById('p-disc').innerText = inv.disc.toFixed(2); document.getElementById('p-total').innerText = inv.fin.toFixed(2);
+    document.title = inv.cust + "_" + Date.now();
+    setTimeout(() => { window.print(); resetBill(); }, 600);
+}
+
+function resetBill() { currentBillItems=[]; document.getElementById('c-name').value=''; document.getElementById('c-mob').value=''; renderBItems(); calcTotal(); updateDash(); renderStock(); renderH(); }
+function renderH() { const q = document.getElementById('h-search').value.toLowerCase(); document.getElementById('h-list').innerHTML = shop.history.filter(h=>h.cust.toLowerCase().includes(q)).reverse().map(h=>`<div class='card' onclick='printInv(${JSON.stringify(h)})' style='cursor:pointer;'><b>${h.cust}</b><br><small>${h.date} - ₹${h.fin}</small></div>`).join(''); }
+
+// Backup/Restore
+function downloadBackup() { const blob = new Blob([JSON.stringify(shop)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download=`Auraa_Backup.json`; a.click(); }
+function restoreBackup() { const f = document.getElementById('importFile').files[0]; if(!f) return; const r = new FileReader(); r.onload=(e)=>{ shop=JSON.parse(e.target.result); saveShop(shop); location.reload(); }; r.readAsText(f); }
 </script>
-
 </body>
 </html>
