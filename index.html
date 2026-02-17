@@ -1,1146 +1,1808 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Auraa Billing PRO - V1 Ultimate</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        /* ==========================================================================
-           1. CORE VARIABLES & THEME CONFIGURATION
-           ========================================================================== */
-        :root {
-            /* Brand Colors */
-            --primary: #2563eb;       /* Royal Blue */
-            --primary-dark: #1e40af;  /* Dark Blue */
-            --secondary: #64748b;     /* Slate Gray */
-            --success: #16a34a;       /* Green */
-            --danger: #dc2626;        /* Red */
-            --warning: #ca8a04;       /* Gold/Yellow */
-            --whatsapp: #25D366;      /* WhatsApp Green */
-            --insta: #E1306C;         /* Instagram Pink */
-            
-            /* Backgrounds */
-            --bg-body: #f1f5f9;
-            --bg-card: #ffffff;
-            --border-color: #e2e8f0;
-            
-            /* Layout */
-            --radius: 10px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURAA BILLING PRO V20 - Premium Billing Software</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ====== CSS RESET & ROOT VARIABLES ====== */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg-primary:#0a0e17;--bg-secondary:#111827;--bg-card:#1a1f2e;--bg-card-hover:#232a3b;
+--accent:#6c5ce7;--accent2:#a29bfe;--accent-glow:rgba(108,92,231,.3);
+--success:#00b894;--danger:#e74c6c;--warning:#fdcb6e;--info:#74b9ff;
+--text-primary:#f0f0f0;--text-secondary:#8b95a5;--text-muted:#5a6474;
+--border:#2a3142;--sidebar-w:260px;--radius:12px;--radius-sm:8px;
+--shadow:0 4px 24px rgba(0,0,0,.3);--transition:all .3s ease;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+input,select,textarea{font-family:inherit;outline:none}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
 
-        /* ==========================================================================
-           2. GLOBAL RESETS & BASE STYLES
-           ========================================================================== */
-        * {
-            box-sizing: border-box;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+/* ====== AUTH PAGES ====== */
+.auth-container{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a0e17 0%,#1a1040 50%,#0a0e17 100%);padding:20px}
+.auth-box{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;box-shadow:var(--shadow)}
+.auth-logo{text-align:center;margin-bottom:30px}
+.auth-logo h1{font-size:1.8rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+.auth-logo p{color:var(--text-secondary);font-size:.85rem;margin-top:5px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;margin-bottom:6px;color:var(--text-secondary);font-size:.85rem;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 15px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:.95rem;transition:var(--transition)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.btn{padding:12px 24px;border-radius:var(--radius-sm);font-weight:600;font-size:.95rem;transition:var(--transition);display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;width:100%}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--accent-glow)}
+.btn-success{background:linear-gradient(135deg,var(--success),#00a381);color:#fff}
+.btn-danger{background:linear-gradient(135deg,var(--danger),#c0392b);color:#fff}
+.btn-warning{background:linear-gradient(135deg,var(--warning),#e67e22);color:#1a1a1a}
+.btn-info{background:linear-gradient(135deg,var(--info),#0984e3);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-primary)}
+.btn-outline:hover{border-color:var(--accent);background:var(--accent-glow)}
+.btn-sm{padding:8px 16px;font-size:.8rem;border-radius:6px}
+.btn-xs{padding:5px 10px;font-size:.75rem;border-radius:5px}
+.auth-footer{text-align:center;margin-top:20px;color:var(--text-muted);font-size:.8rem}
+.auth-footer a{color:var(--accent2);cursor:pointer}
+.auth-footer a:hover{text-decoration:underline}
+.auth-support{text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid var(--border)}
+.auth-support p{color:var(--text-muted);font-size:.75rem;margin:3px 0}
 
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-body);
-            color: #0f172a;
-            font-size: 14px;
-            padding-bottom: 100px; /* Space for Bottom Nav */
-            user-select: none; /* App-like feel */
-        }
+/* ====== LAYOUT ====== */
+.app-layout{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--bg-secondary);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;transition:var(--transition)}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--border);text-align:center}
+.sidebar-header h2{font-size:1.1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+.sidebar-header p{color:var(--text-muted);font-size:.7rem;margin-top:3px}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:var(--text-secondary);font-size:.9rem;cursor:pointer;transition:var(--transition);border-left:3px solid transparent;margin:2px 0}
+.nav-item:hover{background:var(--bg-card);color:var(--text-primary)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent2);border-left-color:var(--accent)}
+.nav-item i{width:20px;text-align:center;font-size:1rem}
+.nav-divider{height:1px;background:var(--border);margin:10px 15px}
+.sidebar-footer{padding:15px;border-top:1px solid var(--border)}
+.sidebar-footer p{color:var(--text-muted);font-size:.65rem;text-align:center;line-height:1.5}
+.main-content{margin-left:var(--sidebar-w);flex:1;padding:20px;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;flex-wrap:wrap;gap:10px}
+.topbar h2{font-size:1.5rem;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.shop-badge{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 15px;font-size:.8rem;color:var(--text-secondary)}
+.mobile-toggle{display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text-primary);font-size:1.1rem}
 
-        /* ==========================================================================
-           3. LAYOUT UTILITIES
-           ========================================================================== */
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 15px;
-        }
+/* ====== WARNING BANNER ====== */
+.warning-banner{background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:20px;display:flex;align-items:center;gap:10px;font-size:.9rem;animation:pulse-banner 2s infinite}
+@keyframes pulse-banner{0%,100%{opacity:1}50%{opacity:.85}}
 
-        .hidden {
-            display: none !important;
-        }
+/* ====== CARDS ====== */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:25px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:var(--transition)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--accent)}
+.stat-card .stat-icon{width:45px;height:45px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:12px}
+.stat-card .stat-value{font-size:1.6rem;font-weight:700;margin-bottom:4px}
+.stat-card .stat-label{color:var(--text-secondary);font-size:.8rem}
+.icon-sales{background:rgba(0,184,148,.15);color:var(--success)}
+.icon-bills{background:rgba(108,92,231,.15);color:var(--accent)}
+.icon-stock{background:rgba(116,185,255,.15);color:var(--info)}
+.icon-low{background:rgba(231,76,108,.15);color:var(--danger)}
+.icon-due{background:rgba(253,203,110,.15);color:var(--warning)}
+.icon-expense{background:rgba(231,76,108,.15);color:var(--danger)}
 
-        .flex-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;flex-wrap:wrap;gap:10px}
+.card-header h3{font-size:1.1rem;font-weight:600}
 
-        .space-between {
-            justify-content: space-between;
-        }
+/* ====== TABLE ====== */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg-secondary);color:var(--text-secondary);font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:12px 15px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 15px;border-bottom:1px solid var(--border);font-size:.88rem;vertical-align:middle;white-space:nowrap}
+tr:hover td{background:var(--bg-card-hover)}
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
+/* ====== MODAL ====== */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.active{opacity:1;pointer-events:all}
+.modal{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:25px;transform:scale(.9);transition:transform .3s}
+.modal-overlay.active .modal{transform:scale(1)}
+.modal-lg{max-width:900px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-header h3{font-size:1.2rem;font-weight:700}
+.modal-close{background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;width:35px;height:35px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);cursor:pointer;transition:var(--transition)}
+.modal-close:hover{background:var(--danger);color:#fff}
 
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
+/* ====== TOAST ====== */
+.toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{padding:14px 20px;border-radius:var(--radius-sm);color:#fff;font-size:.9rem;min-width:280px;display:flex;align-items:center;gap:10px;animation:slideIn .3s ease;box-shadow:var(--shadow)}
+.toast-success{background:linear-gradient(135deg,#00b894,#00a381)}
+.toast-error{background:linear-gradient(135deg,#e74c6c,#c0392b)}
+.toast-warning{background:linear-gradient(135deg,#fdcb6e,#e67e22);color:#1a1a1a}
+.toast-info{background:linear-gradient(135deg,#74b9ff,#0984e3)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}
 
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .w-full { width: 100%; }
-        .bold { font-weight: 700; }
+/* ====== BILLING ====== */
+.billing-layout{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.cart-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg-secondary);border-radius:var(--radius-sm);margin-bottom:8px}
+.cart-item-info{flex:1}
+.cart-item-info h4{font-size:.9rem;margin-bottom:2px}
+.cart-item-info p{color:var(--text-secondary);font-size:.78rem}
+.qty-controls{display:flex;align-items:center;gap:5px}
+.qty-controls button{width:28px;height:28px;border-radius:6px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);font-size:.9rem;display:flex;align-items:center;justify-content:center}
+.qty-controls span{width:30px;text-align:center;font-weight:600}
+.cart-total{font-weight:700;color:var(--accent2);min-width:70px;text-align:right}
+.cart-remove{color:var(--danger);cursor:pointer;font-size:1rem}
+.summary-row{display:flex;justify-content:space-between;padding:8px 0;font-size:.9rem}
+.summary-row.total{font-size:1.1rem;font-weight:700;border-top:2px solid var(--accent);padding-top:12px;margin-top:5px;color:var(--accent2)}
+.search-dropdown{position:relative}
+.search-results{position:absolute;top:100%;left:0;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:0 0 var(--radius-sm) var(--radius-sm);max-height:200px;overflow-y:auto;z-index:50;display:none}
+.search-results.show{display:block}
+.search-result-item{padding:10px 15px;cursor:pointer;border-bottom:1px solid var(--border);font-size:.85rem;transition:var(--transition)}
+.search-result-item:hover{background:var(--accent-glow)}
+.search-result-item .item-stock{color:var(--text-muted);font-size:.75rem}
 
-        /* ==========================================================================
-           4. COMPONENT STYLES (Cards, Buttons, Inputs)
-           ========================================================================== */
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            padding: 16px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            margin-bottom: 16px;
-        }
+/* ====== LOCK PAGE ====== */
+.lock-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a0e17,#1a1040,#0a0e17);padding:30px;text-align:center}
+.lock-icon{font-size:4rem;color:var(--danger);margin-bottom:20px;animation:lockBounce 1s ease infinite alternate}
+@keyframes lockBounce{0%{transform:scale(1)}100%{transform:scale(1.1)}}
+.lock-page h1{font-size:2rem;margin-bottom:10px}
+.lock-page p{color:var(--text-secondary);max-width:500px;margin-bottom:30px;line-height:1.6}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:1000px;width:100%;margin-bottom:30px}
+.plan-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:25px;text-align:center;transition:var(--transition);position:relative}
+.plan-card:hover{transform:translateY(-5px);border-color:var(--accent)}
+.plan-card.popular{border-color:var(--accent);box-shadow:0 0 30px var(--accent-glow)}
+.plan-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:4px 15px;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap}
+.plan-card h3{font-size:1.1rem;margin-bottom:5px;margin-top:10px}
+.plan-card .plan-price{font-size:2rem;font-weight:800;color:var(--accent2);margin:10px 0}
+.plan-card .plan-price span{font-size:.85rem;color:var(--text-secondary);font-weight:400}
+.plan-card .plan-save{color:var(--success);font-size:.8rem;margin-bottom:15px}
+.plan-card .plan-duration{color:var(--text-secondary);font-size:.85rem;margin-bottom:15px}
 
-        /* Stats Box */
-        .stat-box {
-            background: var(--bg-card);
-            padding: 12px 5px;
-            border-radius: var(--radius);
-            text-align: center;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .stat-box h3 { margin: 0; font-size: 15px; color: var(--primary); }
-        .stat-box p { margin: 4px 0 0; font-size: 10px; color: var(--secondary); text-transform: uppercase; font-weight: 800; }
+/* ====== SUB POPUP ====== */
+.sub-popup .modal{max-width:800px;background:linear-gradient(180deg,var(--bg-card),#0f1320);border-color:var(--accent)}
+.sub-popup-header{text-align:center;margin-bottom:20px}
+.sub-popup-header h2{font-size:1.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+.sub-popup-header p{color:var(--text-secondary);font-size:.85rem;margin-top:5px}
 
-        /* Inputs */
-        label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
+/* ====== BADGES ====== */
+.badge{padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:600;display:inline-block}
+.badge-success{background:rgba(0,184,148,.15);color:var(--success)}
+.badge-danger{background:rgba(231,76,108,.15);color:var(--danger)}
+.badge-warning{background:rgba(253,203,110,.15);color:var(--warning)}
+.badge-info{background:rgba(116,185,255,.15);color:var(--info)}
+.badge-purple{background:rgba(108,92,231,.15);color:var(--accent2)}
 
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 15px;
-            background: #fff;
-            transition: all 0.2s;
-        }
+/* ====== RESPONSIVE ====== */
+@media(max-width:1024px){
+.billing-layout{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+.sidebar{transform:translateX(-100%)}
+.sidebar.open{transform:translateX(0)}
+.main-content{margin-left:0}
+.mobile-toggle{display:block}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+.plans-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+.stats-grid{grid-template-columns:1fr}
+.plans-grid{grid-template-columns:1fr}
+.auth-box{padding:25px}
+}
 
-        input:focus, select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
+/* ====== PRINT ====== */
+.print-area{display:none}
+@media print{
+body *{visibility:hidden}
+.print-area,.print-area *{visibility:visible}
+.print-area{display:block!important;position:fixed;top:0;left:0;right:0;background:#fff;color:#000;padding:20px;z-index:99999;font-size:12px}
+.print-area table{border-collapse:collapse;width:100%}
+.print-area th,.print-area td{border:1px solid #333;padding:6px 8px;text-align:left}
+.print-area .thermal{font-size:11px;max-width:80mm;margin:0 auto}
+.print-area .thermal table th,.print-area .thermal table td{border:none;border-bottom:1px dashed #666;padding:3px 5px}
+}
 
-        input[readonly] {
-            background-color: #f1f5f9;
-            color: #94a3b8;
-            pointer-events: none;
-        }
-
-        /* Buttons */
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            color: white;
-            text-align: center;
-            transition: opacity 0.2s;
-        }
-        .btn:active { opacity: 0.8; transform: scale(0.98); }
-        
-        .btn-primary { background-color: var(--primary); }
-        .btn-success { background-color: var(--success); }
-        .btn-danger { background-color: var(--danger); }
-        .btn-warning { background-color: var(--warning); color: white; }
-        .btn-whatsapp { background-color: var(--whatsapp); color: white; }
-        .btn-outline { 
-            background-color: transparent; 
-            border: 1px solid var(--primary); 
-            color: var(--primary); 
-        }
-        .btn-sm { padding: 6px 12px; font-size: 12px; width: auto; display: inline-block; }
-        .btn-disabled { background-color: #cbd5e1 !important; cursor: not-allowed; }
-
-        /* ==========================================================================
-           5. STAFF MODE & NAVIGATION
-           ========================================================================== */
-        /* Logic: Hide owner elements when body has .staff-mode class */
-        body.staff-mode .owner-only { display: none !important; }
-        body.staff-mode .nav-bar { border-top: 3px solid var(--warning); }
-
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--bg-card);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            font-size: 10px;
-            color: var(--secondary);
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-
-        .nav-item span {
-            display: block;
-            font-size: 20px;
-            margin-bottom: 3px;
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        /* List Items */
-        .list-item {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .list-item:last-child { border-bottom: none; }
-
-        /* ==========================================================================
-           6. PRINTING & IMAGE GENERATION STYLES
-           ========================================================================== */
-        
-        /* Hidden Area for HTML2Canvas to render the receipt image */
-        #receipt-render-area {
-            position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 380px; /* Standard width for good resolution */
-            background: white;
-            padding: 20px;
-            color: black;
-            font-family: monospace;
-            border: 1px solid #000;
-        }
-        .r-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-        .r-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .r-table th { text-align: left; border-bottom: 1px dashed #000; padding: 4px; }
-        .r-table td { padding: 4px; }
-        .r-total { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; text-align: right; font-weight: bold; font-size: 14px; }
-
-        /* Print CSS */
-        #print-area { display: none; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area {
-                display: block !important;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background: white;
-                color: black;
-                z-index: 9999;
-                padding: 0; margin: 0;
-            }
-            .no-print { display: none !important; }
-
-            /* A4 Styles */
-            .print-a4 { padding: 40px; font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; }
-            .print-a4 .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
-            .print-a4 img { max-height: 80px; display: block; margin: 0 auto 10px auto; }
-            .print-a4 h1 { margin: 5px 0; font-size: 28px; text-transform: uppercase; }
-            .print-a4 .meta { display: flex; justify-content: space-between; border-bottom: 1px dotted #000; padding-bottom: 10px; margin-bottom: 20px; }
-            .print-a4 table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-            .print-a4 th { border: 1px solid #000; padding: 8px; background: #eee !important; -webkit-print-color-adjust: exact; text-align: left; }
-            .print-a4 td { border: 1px solid #000; padding: 8px; }
-            .print-a4 .text-r { text-align: right; }
-            .print-a4 .totals { text-align: right; margin-top: 20px; }
-            
-            /* Thermal Styles */
-            .print-thermal { padding: 5px; font-family: monospace; width: 100%; max-width: 300px; margin: 0 auto; font-size: 12px; }
-            .print-thermal .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-            .print-thermal img { max-height: 50px; filter: grayscale(100%); margin: 0 auto; display: block; }
-            .print-thermal table { width: 100%; font-size: 11px; }
-            .print-thermal th { text-align: left; border-bottom: 1px dashed #000; }
-            .print-thermal td { padding: 4px 0; }
-            .print-thermal .text-r { text-align: right; }
-            .print-thermal .totals { border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; }
-        }
-    </style>
+/* Misc */
+.empty-state{text-align:center;padding:40px;color:var(--text-muted)}
+.empty-state i{font-size:3rem;margin-bottom:10px;opacity:.3}
+.tabs{display:flex;gap:5px;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:8px 18px;border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;font-size:.85rem;transition:var(--transition)}
+.tab.active{background:var(--accent);color:#fff}
+.flex-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.gap-10{gap:10px}.mt-10{margin-top:10px}.mt-20{margin-top:20px}.mb-10{margin-bottom:10px}.mb-20{margin-bottom:20px}
+.text-right{text-align:right}.text-center{text-align:center}
+.text-success{color:var(--success)}.text-danger{color:var(--danger)}.text-warning{color:var(--warning)}.text-muted{color:var(--text-muted)}.text-accent{color:var(--accent2)}
+.w-full{width:100%}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+@media(max-width:480px){.grid-2{grid-template-columns:1fr}}
+.sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99}
+.sidebar-overlay.active{display:block}
+.low-stock{color:var(--danger);font-weight:700}
+</style>
 </head>
 <body>
 
-    <div id="auth-view" class="container">
-        <center style="margin-top: 60px; margin-bottom: 40px;">
-            <h1 style="color:var(--primary); font-size: 36px; margin-bottom: 5px;">AURAA PRO</h1>
-            <p style="color:var(--secondary); font-size: 16px;">V19 Ultimate Business System</p>
-        </center>
-        
-        <div id="login-box" class="card">
-            <h3 class="text-center" style="margin-top:0;">Shop Owner Login</h3>
-            <label>Registered Mobile Number</label>
-            <input type="number" id="l-mob" placeholder="Enter 10 Digit Mobile">
-            <label>Password</label>
-            <input type="password" id="l-pass" placeholder="Enter Password">
-            <button class="btn btn-primary" onclick="app.login()">Secure Login</button>
-            
-            <div class="text-center" style="margin-top: 20px;">
-                <p>New Here? <a onclick="ui.toggleAuth('reg')" style="color:var(--primary); cursor: pointer; font-weight:bold;">Register Shop</a></p>
-                
-                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px dashed #ccc;">
-                    <p style="margin: 0 0 5px 0; font-weight: bold; font-size: 12px;">Forgot Password?</p>
-                    <p style="margin: 0 0 10px 0; font-size: 11px; color: #666;">Contact Developer to Reset:</p>
-                    <div class="flex-row space-between">
-                        <button class="btn-sm btn-whatsapp" style="width: 48%;" onclick="window.open('https://wa.me/918000595588?text=Hello%20Priyansh%20Sir,%20I%20forgot%20my%20Auraa%20Billing%20Password', '_blank')">
-                            WhatsApp
-                        </button>
-                        <button class="btn-sm" style="width: 48%; background: var(--insta); color: white;" onclick="window.open('https://instagram.com/mr_priyansh_10k', '_blank')">
-                            Instagram
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
-            <button class="btn btn-sm btn-outline" style="width:100%" onclick="ui.toggleAuth('admin')">Admin Master Panel</button>
-        </div>
+<!-- ====== TOAST CONTAINER ====== -->
+<div class="toast-container" id="toastContainer"></div>
 
-        <div id="reg-box" class="card hidden">
-            <h3 class="text-center" style="margin-top:0;">Register New Shop</h3>
-            <label>Shop Name</label>
-            <input type="text" id="r-name" placeholder="E.g. Auraa Fashion">
-            <label>Shop Address</label>
-            <input type="text" id="r-addr" placeholder="City, Area">
-            <label>Mobile Number (Login ID)</label>
-            <input type="number" id="r-mob" placeholder="10 Digit Mobile Number">
-            <label>Create Password</label>
-            <input type="password" id="r-pass" placeholder="Create Secret Password">
-            <label>Owner PIN (For Staff Unlock)</label>
-            <input type="number" id="r-pin" placeholder="4 Digit PIN">
-            <button class="btn btn-success" onclick="app.register()">Create Account</button>
-            <button class="btn btn-outline" style="margin-top: 10px;" onclick="ui.toggleAuth('login')">Back to Login</button>
-        </div>
+<!-- ====== ALL PAGES ====== -->
+<div id="app"></div>
 
-        <div id="admin-box" class="card hidden">
-            <h3 class="text-center text-danger" style="margin-top:0;">Admin Access</h3>
-            <label>Master Password</label>
-            <input type="password" id="a-pass" placeholder="Enter Admin Key">
-            <button class="btn btn-danger" onclick="admin.login()">Access Panel</button>
-            <button class="btn btn-outline" style="margin-top: 10px;" onclick="ui.toggleAuth('login')">Back</button>
-        </div>
-    </div>
+<!-- ====== PRINT AREA ====== -->
+<div class="print-area" id="printArea"></div>
 
-    <div id="app-view" class="container hidden">
-        <div class="flex-row space-between" style="padding: 10px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 15px;">
-            <div>
-                <h2 id="shop-title" style="margin:0; font-size: 18px;">Shop Name</h2>
-                <small id="sub-status" style="color:var(--success); font-weight:bold;">● Active Plan</small>
-            </div>
-            <div class="flex-row">
-                <button id="lock-btn" class="btn-sm btn-warning" onclick="app.toggleStaff()">🔒 Staff</button>
-                <button class="btn-sm btn-danger" onclick="app.logout()">Logout</button>
-            </div>
-        </div>
-
-        <div id="tab-dash">
-            <div class="grid-4">
-                <div class="stat-box">
-                    <h3 id="d-sale">₹0</h3><p>Today Sale</p>
-                </div>
-                <div class="stat-box">
-                    <h3 id="d-udhaar" style="color:var(--warning)">₹0</h3><p>Total Udhaar</p>
-                </div>
-                <div class="stat-box owner-only">
-                    <h3 id="d-exp" style="color:var(--danger)">₹0</h3><p>Expenses</p>
-                </div>
-                <div class="stat-box owner-only">
-                    <h3 id="d-profit" style="color:var(--success)">₹0</h3><p>Net Profit</p>
-                </div>
-            </div>
-
-            <div class="card owner-only">
-                <h4 style="margin-top:0">⚠️ Low Stock Alert</h4>
-                <div id="low-stock-list" style="font-size:12px; color:var(--secondary); max-height: 100px; overflow-y: auto;">
-                    Scanning Inventory...
-                </div>
-            </div>
-
-            <button id="btn-new-inv" class="btn btn-primary" onclick="ui.tab('bill')">+ Create New Invoice</button>
-        </div>
-
-        <div id="tab-bill" class="hidden">
-            <div class="card">
-                <h4>Customer Details</h4>
-                <div class="grid-2">
-                    <div>
-                        <label>Mobile (Auto-Fill)*</label>
-                        <input type="number" id="b-cmob" placeholder="Search Mobile..." oninput="billing.checkCustomer(this)">
-                    </div>
-                    <div>
-                        <label>Customer Name*</label>
-                        <input type="text" id="b-cname" placeholder="Name">
-                    </div>
-                </div>
-                <label>Address</label>
-                <input type="text" id="b-caddr" placeholder="City / Area">
-            </div>
-
-            <div class="card">
-                <div class="flex-row space-between" style="margin-bottom:10px;">
-                    <h4 style="margin:0">Items Cart</h4>
-                    <button class="btn-sm btn-outline" onclick="billing.addRow()">+ Add Item</button>
-                </div>
-                <div id="bill-rows-container">
-                    </div>
-            </div>
-
-            <div class="card">
-                <div class="grid-2">
-                    <div>
-                        <label>Discount Type</label>
-                        <select id="b-disc-type" onchange="billing.calc()">
-                            <option value="flat">Flat ₹</option>
-                            <option value="percent">Percent %</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Discount Value</label>
-                        <input type="number" id="b-disc-val" value="0" oninput="billing.calc()">
-                    </div>
-                </div>
-                <div class="grid-2">
-                    <div>
-                        <label>Tax / GST (%)</label>
-                        <input type="number" id="b-tax" value="0" oninput="billing.calc()">
-                    </div>
-                    <div>
-                        <label>Amount Paid</label>
-                        <input type="number" id="b-paid" placeholder="Cash Received" oninput="billing.calc()">
-                    </div>
-                </div>
-                <hr style="margin:15px 0; border:0; border-top:1px dashed #ccc;">
-                <div class="flex-row space-between">
-                    <span>Grand Total:</span>
-                    <strong id="b-total" style="font-size:20px; color:var(--primary)">₹0</strong>
-                </div>
-                <div class="flex-row space-between" style="color:var(--danger); margin-top:5px;">
-                    <span>Balance Due (Udhaar):</span>
-                    <strong id="b-due">₹0</strong>
-                </div>
-                
-                <div class="grid-2" style="margin-top:20px;">
-                    <button id="btn-save-bill" class="btn btn-success" onclick="billing.save()">SAVE & PRINT</button>
-                    <button id="btn-wa-share" class="btn btn-whatsapp hidden" onclick="billing.genImage()">WHATSAPP BILL</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-stock" class="hidden owner-only">
-            <div class="card">
-                <h4 style="margin-top:0">Add New Product</h4>
-                <label>Item Name</label>
-                <input type="text" id="s-name" placeholder="Product Name">
-                <div class="grid-2">
-                    <div><label>MRP</label><input type="number" id="s-mrp" placeholder="0"></div>
-                    <div><label>Selling Price</label><input type="number" id="s-sp" placeholder="0"></div>
-                </div>
-                <div class="grid-2">
-                    <div><label>Cost Price (Buy Rate)</label><input type="number" id="s-cp" placeholder="0"></div>
-                    <div><label>Quantity</label><input type="number" id="s-qty" placeholder="0"></div>
-                </div>
-                <button class="btn btn-primary" onclick="stock.add()">Save to Stock</button>
-            </div>
-            
-            <div class="card">
-                <input type="text" id="s-search" placeholder="Search Inventory..." oninput="stock.render()">
-                <div id="stock-list" style="margin-top:10px"></div>
-            </div>
-        </div>
-
-        <div id="tab-history" class="hidden owner-only">
-            <div class="card">
-                <input type="text" id="h-search" placeholder="Search by Customer Name..." oninput="history.render()">
-                <div id="history-list" style="margin-top:10px"></div>
-            </div>
-        </div>
-
-        <div id="tab-expense" class="hidden owner-only">
-            <div class="card">
-                <h4 style="margin-top:0">Record Daily Expense</h4>
-                <div class="grid-2">
-                    <div><label>Description</label><input type="text" id="e-desc" placeholder="Tea, Rent, Electricity..."></div>
-                    <div><label>Amount</label><input type="number" id="e-amt" placeholder="0"></div>
-                </div>
-                <button class="btn btn-danger" onclick="expense.add()">Add Expense</button>
-            </div>
-            <div id="expense-list" class="card"></div>
-        </div>
-
-        <div id="tab-settings" class="hidden owner-only">
-            <div class="card">
-                <h4 style="margin-top:0">Shop Logo</h4>
-                <img id="logo-preview" src="" alt="No Logo" style="max-height:60px; margin-bottom:10px; display:block; border:1px dashed #ccc; padding:5px;">
-                <input type="file" id="logo-upload" accept="image/*" onchange="settings.logo()">
-            </div>
-            
-            <div class="card">
-                <h4 style="margin-top:0">Data & Printing</h4>
-                <label>Invoice Style</label>
-                <select id="set-print" onchange="settings.printStyle()">
-                    <option value="a4">A4 Standard (Laser/Inkjet)</option>
-                    <option value="thermal">Thermal POS (58mm/80mm)</option>
-                </select>
-                <div class="grid-2" style="margin-top:10px">
-                    <button class="btn btn-primary" onclick="settings.backup()">Backup Data</button>
-                    <button class="btn btn-success" onclick="settings.exportExcel()">Export Excel</button>
-                </div>
-                <button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="document.getElementById('restore-file').click()">Restore Data</button>
-                <input type="file" id="restore-file" class="hidden" onchange="settings.restore()">
-            </div>
-
-            <div class="card" style="border-color:var(--danger); background:#fff5f5;">
-                <h4 style="color:var(--danger); margin-top:0;">Danger Zone</h4>
-                <p style="font-size:11px; margin-bottom:10px;">Use this to clear all data and start fresh.</p>
-                <button class="btn btn-danger" onclick="app.reset()">Factory Reset App Data</button>
-            </div>
-        </div>
-
-        <div class="nav-bar">
-            <button class="nav-item active" onclick="ui.tab('dash')" id="nav-dash"><span>🏠</span>Home</button>
-            <button class="nav-item" onclick="ui.tab('bill')" id="nav-bill"><span>🧾</span>Bill</button>
-            <button class="nav-item owner-only" onclick="ui.tab('stock')" id="nav-stock"><span>📦</span>Stock</button>
-            <button class="nav-item owner-only" onclick="ui.tab('history')" id="nav-history"><span>📜</span>History</button>
-            <button class="nav-item owner-only" onclick="ui.tab('expense')" id="nav-expense"><span>💸</span>Exp</button>
-            <button class="nav-item owner-only" onclick="ui.tab('settings')" id="nav-settings"><span>⚙️</span>Set</button>
-        </div>
-    </div>
-
-    <div id="admin-panel" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#f8fafc; z-index:5000; overflow-y:auto; padding:15px;">
-        <div class="flex-row space-between" style="background:white; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-            <h2 style="margin:0; color:var(--primary);">Admin Master</h2>
-            <button class="btn-sm btn-danger" onclick="location.reload()">Close</button>
-        </div>
-        <div id="admin-list"></div>
-    </div>
-
-    <div id="receipt-render-area"></div>
-    <div id="print-area"></div>
+<!-- ====== FIREBASE ====== -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <script>
-    /* ==========================================================================
-       CORE SYSTEM - VARIABLES & DATABASE (V19 FINAL)
-       ========================================================================== */
-    const DB_KEY = 'auraa_v19_'; // Clean Database Key
-    let shop = null;
-    let isStaff = false;
-    let lastInvoice = null;
+// ============================================================
+// FIREBASE CONFIG - REPLACE WITH YOUR CONFIG
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDzYUQPWneeBElfaYAxa9HTB6FxpT6Iu7I",
+  authDomain: "auraa-billing.firebaseapp.com",
+  projectId: "auraa-billing",
+  storageBucket: "auraa-billing.firebasestorage.app",
+  messagingSenderId: "866633121937",
+  appId: "1:866633121937:web:4156fd11d375cc05d1ff30",
+  measurementId: "G-46W2ENKK16"
+};
 
-    // --- UTILS ---
-    const el = (id) => document.getElementById(id);
-    const val = (id) => el(id).value;
-    const num = (id) => parseFloat(val(id)) || 0;
-    const money = (n) => '₹' + (parseFloat(n) || 0).toFixed(2);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    /* ==========================================================================
-       MODULE 1: APP CONTROLLER
-       ========================================================================== */
-    const app = {
-        init: () => {
-            const active = localStorage.getItem('auraa_active_user');
-            const role = localStorage.getItem('auraa_user_role');
-            if (active) {
-                shop = JSON.parse(localStorage.getItem(DB_KEY + active));
-                if (shop) {
-                    if (role === 'staff') isStaff = true;
-                    app.loadDash();
-                }
-            }
-        },
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+const ADMIN_UID = "uCxPyF64YgdT73skPwFxKpww9mo1"; // Set your admin UID
+const APP_VERSION = "V20";
+const WHATSAPP = "8000595588";
+const INSTAGRAM = "mr_priyansh_10k";
 
-        register: () => {
-            const mob = val('r-mob').trim();
-            if (!mob || mob.length < 10) return alert("Please enter valid 10-digit mobile");
-            
-            if (localStorage.getItem(DB_KEY + mob)) return alert("Error: Shop already registered!");
-            
-            const newShop = {
-                mob: mob,
-                name: val('r-name'),
-                addr: val('r-addr'),
-                pass: val('r-pass'),
-                pin: val('r-pin'),
-                expiry: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 Days Trial
-                logo: '',
-                printStyle: 'a4',
-                stock: [],
-                invoices: [],
-                expenses: []
-            };
-            
-            localStorage.setItem(DB_KEY + mob, JSON.stringify(newShop));
-            alert("Registration Successful! Please Login.");
-            ui.toggleAuth('login');
-        },
+let currentUser = null;
+let shopData = null;
+let currentPage = 'dashboard';
+let cart = [];
+let staffMode = false;
+let sidebarOpen = false;
 
-        login: () => {
-            const mob = val('l-mob').trim();
-            const pass = val('l-pass');
-            const data = localStorage.getItem(DB_KEY + mob);
-            
-            if (data) {
-                const s = JSON.parse(data);
-                if (s.pass === pass) {
-                    shop = s;
-                    localStorage.setItem('auraa_active_user', mob);
-                    localStorage.setItem('auraa_user_role', 'owner');
-                    isStaff = false;
-                    app.loadDash();
-                } else {
-                    alert("Incorrect Password");
-                }
-            } else {
-                alert("Shop not found. Register first.");
-            }
-        },
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+function $(id) { return document.getElementById(id); }
+function qs(sel) { return document.querySelector(sel); }
+function qsa(sel) { return document.querySelectorAll(sel); }
 
-        save: () => {
-            if (shop) localStorage.setItem(DB_KEY + shop.mob, JSON.stringify(shop));
-        },
+function toast(msg, type = 'info') {
+  const container = $('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  const icons = { success: 'check-circle', error: 'times-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+  t.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i><span>${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(() => { t.style.animation = 'slideOut .3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3500);
+}
 
-        logout: () => {
-            localStorage.removeItem('auraa_active_user');
-            localStorage.removeItem('auraa_user_role');
-            location.reload();
-        },
+function formatCurrency(n) { return '₹' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function formatDate(d) { if (!d) return '-'; const dt = d.toDate ? d.toDate() : new Date(d); return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+function formatDateTime(d) { if (!d) return '-'; const dt = d.toDate ? d.toDate() : new Date(d); return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function getDeviceId() { let id = localStorage.getItem('auraa_device_id'); if (!id) { id = 'DEV_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('auraa_device_id', id); } return id; }
+function daysLeft(dateStr) { if (!dateStr) return -1; const end = new Date(dateStr); const now = new Date(); now.setHours(0, 0, 0, 0); end.setHours(0, 0, 0, 0); return Math.ceil((end - now) / 86400000); }
+function addDays(dateStr, days) { const d = new Date(dateStr); d.setDate(d.getDate() + days); return d.toISOString().split('T')[0]; }
 
-        reset: () => {
-            if (confirm("DANGER: This will delete ALL shop data forever. Are you sure?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        },
-        
-        loadDash: () => {
-            el('auth-view').classList.add('hidden');
-            el('app-view').classList.remove('hidden');
-            el('shop-title').innerText = shop.name;
-            ui.applyMode(); 
+function supportFooter() {
+  return `<div class="auth-support"><p>📲 WhatsApp: <a href="https://wa.me/91${WHATSAPP}" target="_blank">${WHATSAPP}</a></p><p>📸 Instagram: <a href="https://instagram.com/${INSTAGRAM}" target="_blank">@${INSTAGRAM}</a></p><p style="margin-top:8px;font-size:.7rem;color:var(--text-muted)">Powered by AURAA BILLING PRO ${APP_VERSION}</p></div>`;
+}
 
-            // Expiry Logic
-            if (Date.now() > shop.expiry) {
-                el('sub-status').innerText = "● EXPIRED";
-                el('sub-status').style.color = "var(--danger)";
-                el('btn-new-inv').classList.add('hidden'); 
-                el('btn-save-bill').classList.add('btn-disabled');
-                el('btn-save-bill').onclick = () => alert("Plan Expired. Contact Admin.");
-            } else {
-                el('sub-status').innerText = "● Active Plan";
-                el('sub-status').style.color = "var(--success)";
-                el('btn-new-inv').classList.remove('hidden');
-                el('btn-save-bill').classList.remove('btn-disabled');
-                el('btn-save-bill').onclick = () => billing.save();
-            }
+// ============================================================
+// RENDER ENGINE
+// ============================================================
+function render(html) { $('app').innerHTML = html; }
 
-            // Calculations
-            const today = new Date().toLocaleDateString();
-            let sale = 0, udhaar = 0, exp = 0, profit = 0;
-            
-            (shop.invoices || []).forEach(i => {
-                if (i.date.includes(today)) sale += (i.final || 0);
-                udhaar += (i.due || 0);
-                (i.items || []).forEach(item => {
-                    const cost = item.cost || (item.price * 0.8);
-                    profit += (item.price - cost) * item.qty;
-                });
-            });
+// ============================================================
+// AUTH: LOGIN PAGE
+// ============================================================
+function renderLogin() {
+  render(`
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-logo">
+          <h1><i class="fas fa-bolt"></i> AURAA BILLING PRO</h1>
+          <p>Premium Multi-Shop Billing Software ${APP_VERSION}</p>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="loginMobile" placeholder="Enter mobile number" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter password">
+        </div>
+        <button class="btn btn-primary" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+        <div class="auth-footer mt-20">
+          <p>Don't have an account? <a onclick="renderRegister()">Register Now</a></p>
+        </div>
+        ${supportFooter()}
+      </div>
+    </div>
+  `);
+}
 
-            (shop.expenses || []).forEach(e => exp += (e.amt || 0));
+async function handleLogin() {
+  const mobile = $('loginMobile').value.trim();
+  const pass = $('loginPassword').value;
+  if (!mobile || mobile.length !== 10) return toast('Enter valid 10-digit mobile', 'error');
+  if (!pass) return toast('Enter password', 'error');
+  try {
+    const email = mobile + '@auraa.com';
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    currentUser = cred.user;
+    await postLoginCheck();
+  } catch (e) {
+    toast('Login failed: ' + e.message, 'error');
+  }
+}
 
-            el('d-sale').innerText = money(sale);
-            el('d-udhaar').innerText = money(udhaar);
-            el('d-exp').innerText = money(exp);
-            el('d-profit').innerText = money(profit - exp);
+// ============================================================
+// AUTH: REGISTER PAGE
+// ============================================================
+function renderRegister() {
+  render(`
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-logo">
+          <h1><i class="fas fa-bolt"></i> AURAA BILLING PRO</h1>
+          <p>Register Your Shop - ${APP_VERSION}</p>
+        </div>
+        <div class="form-group"><label>Mobile Number</label><input type="tel" id="regMobile" placeholder="10 digit mobile" maxlength="10"></div>
+        <div class="form-group"><label>Shop Name</label><input type="text" id="regShopName" placeholder="Your shop name"></div>
+        <div class="form-group"><label>Shop Address</label><input type="text" id="regShopAddress" placeholder="Shop address"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="regPass" placeholder="Create password"></div>
+        <div class="form-group"><label>Confirm Password</label><input type="password" id="regPassConfirm" placeholder="Confirm password"></div>
+        <button class="btn btn-primary" onclick="handleRegister()"><i class="fas fa-user-plus"></i> Register Shop</button>
+        <div class="auth-footer mt-20"><p>Already have an account? <a onclick="renderLogin()">Login</a></p></div>
+        ${supportFooter()}
+      </div>
+    </div>
+  `);
+}
 
-            const low = (shop.stock || []).filter(i => i.qty < 5);
-            el('low-stock-list').innerHTML = low.length ? low.map(i => `• ${i.name} (${i.qty})`).join('<br>') : "✅ Stock is Healthy";
-            
-            if (shop.logo) el('logo-preview').src = shop.logo;
-            el('set-print').value = shop.printStyle || 'a4';
-            
-            billing.init();
-            history.render();
-        },
+async function handleRegister() {
+  const mobile = $('regMobile').value.trim();
+  const shopName = $('regShopName').value.trim();
+  const shopAddr = $('regShopAddress').value.trim();
+  const pass = $('regPass').value;
+  const passC = $('regPassConfirm').value;
+  if (!mobile || mobile.length !== 10) return toast('Enter valid 10-digit mobile', 'error');
+  if (!shopName) return toast('Enter shop name', 'error');
+  if (!pass || pass.length < 6) return toast('Password min 6 chars', 'error');
+  if (pass !== passC) return toast('Passwords do not match', 'error');
+  try {
+    const email = mobile + '@auraa.com';
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    const today = todayStr();
+    const trialEnd = addDays(today, 7);
+    await db.collection('shops').doc(uid).set({
+      shopName, shopAddress: shopAddr, ownerMobile: mobile,
+      createdAt: today,
+      trialStartDate: today, trialEndDate: trialEnd, isTrialActive: true,
+      subscriptionActive: false, planType: '', planPrice: 0,
+      subscriptionStartDate: '', subscriptionEndDate: '', lastPaymentDate: '', paymentStatus: '',
+      blocked: false,
+      devices: [getDeviceId()], maxDevicesAllowed: 2,
+      staffModeEnabled: false, ownerPin: '1234',
+      printFormat: 'a4', logoBase64: '', invoiceCounter: 0
+    });
+    currentUser = cred.user;
+    toast('Registration successful! 7 Days Free Trial Activated', 'success');
+    await postLoginCheck();
+  } catch (e) {
+    toast('Registration failed: ' + e.message, 'error');
+  }
+}
 
-        toggleStaff: () => {
-            if (isStaff) {
-                const pin = prompt("Enter Owner PIN to Unlock:");
-                if (pin === shop.pin) {
-                    isStaff = false;
-                    localStorage.setItem('auraa_user_role', 'owner');
-                    alert("Owner Mode Active");
-                    ui.applyMode();
-                } else {
-                    alert("Wrong PIN");
-                }
-            } else {
-                if (confirm("Switch to Staff Mode? (Restricted Access)")) {
-                    isStaff = true;
-                    localStorage.setItem('auraa_user_role', 'staff');
-                    ui.tab('bill');
-                    ui.applyMode();
-                }
-            }
-        }
+// ============================================================
+// POST LOGIN CHECK
+// ============================================================
+async function postLoginCheck() {
+  try {
+    const uid = currentUser.uid;
+    const doc = await db.collection('shops').doc(uid).get();
+    if (!doc.exists) { toast('Shop data not found', 'error'); renderLogin(); return; }
+    shopData = doc.data();
+    shopData.uid = uid;
+
+    // Check blocked
+    if (shopData.blocked) { renderBlockedPage(); return; }
+
+    // Check device limit
+    const deviceId = getDeviceId();
+    let devices = shopData.devices || [];
+    if (!devices.includes(deviceId)) {
+      if (devices.length >= (shopData.maxDevicesAllowed || 2)) {
+        toast('Device limit reached. Contact admin.', 'error');
+        auth.signOut(); renderLogin(); return;
+      }
+      devices.push(deviceId);
+      await db.collection('shops').doc(uid).update({ devices });
+      shopData.devices = devices;
+    }
+
+    // Check subscription/trial status
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const trialEnd = shopData.trialEndDate ? new Date(shopData.trialEndDate) : null;
+    const subEnd = shopData.subscriptionEndDate ? new Date(shopData.subscriptionEndDate) : null;
+    if (trialEnd) trialEnd.setHours(0, 0, 0, 0);
+    if (subEnd) subEnd.setHours(0, 0, 0, 0);
+
+    let hasAccess = false;
+    // Step 2: Trial active
+    if (trialEnd && today <= trialEnd && !shopData.subscriptionActive) hasAccess = true;
+    // Step 3: Sub active
+    if (shopData.subscriptionActive && subEnd && today <= subEnd) hasAccess = true;
+
+    if (!hasAccess) { renderLockPage(); return; }
+
+    // Staff mode check
+    staffMode = shopData.staffModeEnabled || false;
+
+    currentPage = 'dashboard';
+    renderApp();
+
+    // Show subscription popup if trial user or near expiry
+    const dl = daysLeft(shopData.subscriptionActive ? shopData.subscriptionEndDate : shopData.trialEndDate);
+    const shownToday = localStorage.getItem('auraa_sub_popup_' + todayStr());
+    if (!shownToday && ((!shopData.subscriptionActive) || dl <= 5)) {
+      setTimeout(() => showSubscriptionPopup(), 1500);
+      localStorage.setItem('auraa_sub_popup_' + todayStr(), '1');
+    }
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+// ============================================================
+// BLOCKED PAGE
+// ============================================================
+function renderBlockedPage() {
+  render(`
+    <div class="lock-page">
+      <div class="lock-icon"><i class="fas fa-ban"></i></div>
+      <h1>🚫 Account Blocked</h1>
+      <p>Your account has been blocked by the administrator. Please contact support for assistance.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        <a href="https://wa.me/91${WHATSAPP}" target="_blank" class="btn btn-success"><i class="fab fa-whatsapp"></i> WhatsApp Support</a>
+        <a href="https://instagram.com/${INSTAGRAM}" target="_blank" class="btn btn-info"><i class="fab fa-instagram"></i> Instagram</a>
+        <button class="btn btn-outline" onclick="auth.signOut();renderLogin()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+      ${supportFooter()}
+    </div>
+  `);
+}
+
+// ============================================================
+// LOCK PAGE (Trial/Subscription Expired)
+// ============================================================
+function renderLockPage() {
+  render(`
+    <div class="lock-page">
+      <div class="lock-icon"><i class="fas fa-lock"></i></div>
+      <h1>🔒 Your Free Trial Has Ended</h1>
+      <p>Your 7 Days free trial is over. To continue using AURAA Billing Pro, please choose a subscription plan.</p>
+      <div class="plans-grid">
+        ${planCard('Monthly Plan', 299, '/ Month', '', '')}
+        ${planCard('Quarterly Plan', 799, '/ 3 Months', 'Save ₹98', 'popular')}
+        ${planCard('Half-Year Plan', 1499, '/ 6 Months', 'Save ₹295', '')}
+        ${planCard('Yearly Plan', 2499, '/ Year', 'Save ₹1,089', '')}
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px">
+        <a href="https://wa.me/91${WHATSAPP}?text=Hi%2C%20I%20want%20to%20subscribe%20to%20AURAA%20Billing%20Pro%20V20.%20My%20mobile%3A%20${shopData?.ownerMobile || ''}" target="_blank" class="btn btn-success btn-sm"><i class="fab fa-whatsapp"></i> Subscribe via WhatsApp</a>
+        <a href="https://instagram.com/${INSTAGRAM}" target="_blank" class="btn btn-info btn-sm"><i class="fab fa-instagram"></i> Instagram</a>
+        <button class="btn btn-outline btn-sm" onclick="auth.signOut();currentUser=null;shopData=null;renderLogin()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+      ${supportFooter()}
+    </div>
+  `);
+}
+
+function planCard(name, price, duration, save, cls) {
+  return `<div class="plan-card ${cls}">
+    ${cls === 'popular' ? '<div class="plan-badge">⭐ Most Popular</div>' : ''}
+    <h3>${name}</h3>
+    <div class="plan-price">₹${price} <span>${duration}</span></div>
+    ${save ? `<div class="plan-save">✅ ${save}</div>` : '<div class="plan-save">&nbsp;</div>'}
+    <a href="https://wa.me/91${WHATSAPP}?text=Hi%2C%20I%20want%20${encodeURIComponent(name)}%20plan.%20Mobile%3A%20${shopData?.ownerMobile || ''}" target="_blank" class="btn btn-primary btn-sm w-full"><i class="fab fa-whatsapp"></i> Subscribe Now</a>
+  </div>`;
+}
+
+// ============================================================
+// SUBSCRIPTION POPUP
+// ============================================================
+function showSubscriptionPopup() {
+  const existing = document.getElementById('subPopupOverlay');
+  if (existing) existing.remove();
+  const div = document.createElement('div');
+  div.id = 'subPopupOverlay';
+  div.className = 'modal-overlay sub-popup active';
+  div.innerHTML = `
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div></div>
+        <button class="modal-close" onclick="document.getElementById('subPopupOverlay').remove()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="sub-popup-header">
+        <h2><i class="fas fa-crown"></i> AURAA BILLING PRO ${APP_VERSION} Subscription</h2>
+        <p>Choose your plan & unlock premium features forever</p>
+      </div>
+      <div class="plans-grid" style="margin:0 auto 20px">
+        ${planCard('Monthly', 299, '/ Month', '', '')}
+        ${planCard('Quarterly', 799, '/ 3 Months', 'Save ₹98', 'popular')}
+        ${planCard('Half-Year', 1499, '/ 6 Months', 'Save ₹295', '')}
+        ${planCard('Yearly', 2499, '/ Year', 'Save ₹1,089', '')}
+      </div>
+      <div class="text-center">
+        <a href="https://wa.me/91${WHATSAPP}?text=Hi%20I%20want%20to%20subscribe.%20Mobile%3A%20${shopData?.ownerMobile || ''}" target="_blank" class="btn btn-success btn-sm"><i class="fab fa-whatsapp"></i> Contact Support</a>
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('subPopupOverlay').remove()" style="margin-left:10px"><i class="fas fa-times"></i> Close</button>
+      </div>
+      ${supportFooter()}
+    </div>
+  `;
+  document.body.appendChild(div);
+}
+
+// ============================================================
+// MAIN APP LAYOUT
+// ============================================================
+function renderApp() {
+  const isAdmin = currentUser.uid === ADMIN_UID;
+  const dl = daysLeft(shopData.subscriptionActive ? shopData.subscriptionEndDate : shopData.trialEndDate);
+  const showWarning = dl >= 0 && dl <= 5;
+  const trialActive = !shopData.subscriptionActive && daysLeft(shopData.trialEndDate) >= 0;
+
+  render(`
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h2><i class="fas fa-bolt"></i> AURAA BILLING PRO</h2>
+          <p>${APP_VERSION} | ${shopData.shopName || 'My Shop'}</p>
+          ${trialActive ? `<span class="badge badge-warning" style="margin-top:6px">Trial: ${dl} days left</span>` : ''}
+          ${shopData.subscriptionActive ? `<span class="badge badge-success" style="margin-top:6px">${shopData.planType || 'Active'}</span>` : ''}
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-item ${currentPage === 'dashboard' ? 'active' : ''}" onclick="navigate('dashboard')"><i class="fas fa-home"></i> Dashboard</div>
+          <div class="nav-item ${currentPage === 'billing' ? 'active' : ''}" onclick="navigate('billing')"><i class="fas fa-cash-register"></i> New Bill</div>
+          <div class="nav-item ${currentPage === 'history' ? 'active' : ''}" onclick="navigate('history')"><i class="fas fa-file-invoice"></i> Invoice History</div>
+          <div class="nav-item ${currentPage === 'payments' ? 'active' : ''}" onclick="navigate('payments')"><i class="fas fa-money-bill-wave"></i> Due / Payments</div>
+          ${!staffMode ? `
+            <div class="nav-divider"></div>
+            <div class="nav-item ${currentPage === 'stock' ? 'active' : ''}" onclick="navigate('stock')"><i class="fas fa-boxes-stacked"></i> Stock</div>
+            <div class="nav-item ${currentPage === 'expenses' ? 'active' : ''}" onclick="navigate('expenses')"><i class="fas fa-receipt"></i> Expenses</div>
+            <div class="nav-divider"></div>
+            <div class="nav-item ${currentPage === 'settings' ? 'active' : ''}" onclick="navigate('settings')"><i class="fas fa-cog"></i> Settings</div>
+            <div class="nav-item ${currentPage === 'backup' ? 'active' : ''}" onclick="navigate('backup')"><i class="fas fa-database"></i> Backup / Restore</div>
+            ${isAdmin ? `<div class="nav-item ${currentPage === 'admin' ? 'active' : ''}" onclick="navigate('admin')"><i class="fas fa-shield-halved"></i> Admin Panel</div>` : ''}
+          ` : `<div class="nav-divider"></div>`}
+          ${staffMode ? `<div class="nav-item" onclick="showOwnerPinModal()"><i class="fas fa-key"></i> Owner Mode</div>` : ''}
+          <div class="nav-divider"></div>
+          <div class="nav-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+        </nav>
+        <div class="sidebar-footer">
+          <p>📲 ${WHATSAPP}<br>📸 @${INSTAGRAM}<br>Powered by AURAA BILLING PRO ${APP_VERSION}<br>Developed by Priyansh Mehta</p>
+        </div>
+      </aside>
+      <main class="main-content" id="mainContent">
+        <div class="topbar">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <h2 id="pageTitle">Dashboard</h2>
+          </div>
+          <div class="topbar-right">
+            <span class="shop-badge"><i class="fas fa-store"></i> ${shopData.shopName}</span>
+            ${staffMode ? '<span class="badge badge-warning">Staff Mode</span>' : ''}
+          </div>
+        </div>
+        ${showWarning ? `<div class="warning-banner"><i class="fas fa-exclamation-triangle"></i> Your ${trialActive ? 'trial' : 'subscription'} expires in ${dl} day(s)! <a href="https://wa.me/91${WHATSAPP}" target="_blank" style="color:#fff;text-decoration:underline;margin-left:10px">Renew Now</a></div>` : ''}
+        <div id="pageContent"></div>
+      </main>
+    </div>
+  `);
+  renderPage(currentPage);
+}
+
+function toggleSidebar() {
+  const sb = $('sidebar');
+  const ov = $('sidebarOverlay');
+  sidebarOpen = !sidebarOpen;
+  sb.classList.toggle('open', sidebarOpen);
+  ov.classList.toggle('active', sidebarOpen);
+}
+
+function navigate(page) {
+  currentPage = page;
+  if (sidebarOpen) toggleSidebar();
+  renderPage(page);
+}
+
+function renderPage(page) {
+  const titles = { dashboard: 'Dashboard', billing: 'New Bill', history: 'Invoice History', payments: 'Due / Payments', stock: 'Stock Management', expenses: 'Expenses', settings: 'Settings', backup: 'Backup / Restore', admin: 'Admin Panel' };
+  const pt = $('pageTitle');
+  if (pt) pt.textContent = titles[page] || 'Dashboard';
+  qsa('.nav-item').forEach(n => n.classList.remove('active'));
+  const activeNav = qs(`.nav-item[onclick="navigate('${page}')"]`);
+  if (activeNav) activeNav.classList.add('active');
+  const pageRenderers = { dashboard: renderDashboard, billing: renderBilling, history: renderHistory, payments: renderPayments, stock: renderStock, expenses: renderExpenses, settings: renderSettings, backup: renderBackup, admin: renderAdmin };
+  if (pageRenderers[page]) pageRenderers[page]();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function renderDashboard() {
+  const pc = $('pageContent');
+  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading dashboard...</div>';
+  try {
+    const uid = currentUser.uid;
+    const today = todayStr();
+
+    // Today invoices
+    const invSnap = await db.collection('shops').doc(uid).collection('invoices').where('date', '==', today).get();
+    let todaySales = 0, todayBills = 0;
+    const recentInvoices = [];
+    invSnap.forEach(d => { const data = d.data(); todaySales += Number(data.grandTotal || 0); todayBills++; recentInvoices.push({ id: d.id, ...data }); });
+
+    // Stock
+    const stockSnap = await db.collection('shops').doc(uid).collection('stock').get();
+    let totalStock = 0, lowStock = 0;
+    const lowStockItems = [];
+    stockSnap.forEach(d => { const data = d.data(); totalStock++; if ((data.qty || 0) < 10) { lowStock++; lowStockItems.push({ id: d.id, ...data }); } });
+
+    // Due
+    const allInvSnap = await db.collection('shops').doc(uid).collection('invoices').where('due', '>', 0).get();
+    let totalDue = 0;
+    allInvSnap.forEach(d => { totalDue += Number(d.data().due || 0); });
+
+    // Expenses
+    const expSnap = await db.collection('shops').doc(uid).collection('expenses').where('date', '==', today).get();
+    let todayExp = 0;
+    expSnap.forEach(d => { todayExp += Number(d.data().amount || 0); });
+
+    pc.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon icon-sales"><i class="fas fa-indian-rupee-sign"></i></div><div class="stat-value">${formatCurrency(todaySales)}</div><div class="stat-label">Today Sales</div></div>
+        <div class="stat-card"><div class="stat-icon icon-bills"><i class="fas fa-file-invoice"></i></div><div class="stat-value">${todayBills}</div><div class="stat-label">Today Bills</div></div>
+        <div class="stat-card"><div class="stat-icon icon-stock"><i class="fas fa-boxes-stacked"></i></div><div class="stat-value">${totalStock}</div><div class="stat-label">Total Stock Items</div></div>
+        <div class="stat-card"><div class="stat-icon icon-low"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-value">${lowStock}</div><div class="stat-label">Low Stock Items</div></div>
+        <div class="stat-card"><div class="stat-icon icon-due"><i class="fas fa-hand-holding-dollar"></i></div><div class="stat-value">${formatCurrency(totalDue)}</div><div class="stat-label">Total Due Amount</div></div>
+        <div class="stat-card"><div class="stat-icon icon-expense"><i class="fas fa-receipt"></i></div><div class="stat-value">${formatCurrency(todayExp)}</div><div class="stat-label">Today Expenses</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-clock"></i> Recent Invoices</h3></div>
+          ${recentInvoices.length === 0 ? '<div class="empty-state"><i class="fas fa-file-circle-xmark"></i><p>No invoices today</p></div>' : `
+            <div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Customer</th><th>Amount</th></tr></thead><tbody>
+            ${recentInvoices.slice(0, 10).map(inv => `<tr><td>${inv.invoiceNumber || inv.id}</td><td>${inv.customerName || '-'}</td><td>${formatCurrency(inv.grandTotal)}</td></tr>`).join('')}
+            </tbody></table></div>`}
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-triangle-exclamation"></i> Low Stock Items</h3></div>
+          ${lowStockItems.length === 0 ? '<div class="empty-state"><i class="fas fa-check-circle"></i><p>All stock levels OK</p></div>' : `
+            <div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty</th></tr></thead><tbody>
+            ${lowStockItems.slice(0, 10).map(s => `<tr><td>${s.name}</td><td class="low-stock">${s.qty}</td></tr>`).join('')}
+            </tbody></table></div>`}
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    pc.innerHTML = `<div class="text-center text-danger">Error loading dashboard: ${e.message}</div>`;
+  }
+}
+
+// ============================================================
+// STOCK MANAGEMENT
+// ============================================================
+async function renderStock() {
+  const pc = $('pageContent');
+  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading stock...</div>';
+  try {
+    const snap = await db.collection('shops').doc(currentUser.uid).collection('stock').orderBy('name').get();
+    const items = [];
+    snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+
+    pc.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-boxes-stacked"></i> Stock Items (${items.length})</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="stockSearch" placeholder="Search items..." style="padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);width:200px" oninput="filterStockTable()">
+            <button class="btn btn-primary btn-sm" onclick="showStockModal()"><i class="fas fa-plus"></i> Add Item</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Name</th><th>MRP</th><th>SP</th><th>CP</th><th>Qty</th><th>Actions</th></tr></thead>
+          <tbody id="stockTableBody">
+          ${items.length === 0 ? '<tr><td colspan="6" class="text-center text-muted">No stock items found</td></tr>' : items.map(s => `
+            <tr class="stock-row" data-name="${(s.name || '').toLowerCase()}">
+              <td><strong>${s.name}</strong></td>
+              <td>${formatCurrency(s.mrp)}</td>
+              <td>${formatCurrency(s.sp)}</td>
+              <td>${formatCurrency(s.cp)}</td>
+              <td class="${(s.qty || 0) < 10 ? 'low-stock' : ''}">${s.qty || 0}</td>
+              <td>
+                <button class="btn btn-info btn-xs" onclick="showStockModal('${s.id}','${encodeURIComponent(JSON.stringify(s))}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteStock('${s.id}')"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          `).join('')}
+          </tbody></table>
+        </div>
+      </div>
+    `;
+  } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
+}
+
+function filterStockTable() {
+  const q = ($('stockSearch')?.value || '').toLowerCase();
+  qsa('.stock-row').forEach(r => { r.style.display = r.dataset.name.includes(q) ? '' : 'none'; });
+}
+
+function showStockModal(id, dataStr) {
+  const data = dataStr ? JSON.parse(decodeURIComponent(dataStr)) : {};
+  const isEdit = !!id;
+  const html = `
+    <div class="modal-overlay active" id="stockModal" onclick="if(event.target===this)this.remove()">
+      <div class="modal">
+        <div class="modal-header"><h3>${isEdit ? 'Edit' : 'Add'} Stock Item</h3><button class="modal-close" onclick="$('stockModal').remove()"><i class="fas fa-times"></i></button></div>
+        <div class="form-group"><label>Item Name *</label><input type="text" id="sName" value="${data.name || ''}"></div>
+        <div class="grid-2">
+          <div class="form-group"><label>MRP (₹)</label><input type="number" id="sMrp" value="${data.mrp || ''}"></div>
+          <div class="form-group"><label>Selling Price (₹)</label><input type="number" id="sSp" value="${data.sp || ''}"></div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group"><label>Cost Price (₹)</label><input type="number" id="sCp" value="${data.cp || ''}"></div>
+          <div class="form-group"><label>Quantity</label><input type="number" id="sQty" value="${data.qty || 0}"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveStock('${id || ''}')">${isEdit ? 'Update' : 'Add'} Item</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function saveStock(id) {
+  const name = $('sName').value.trim();
+  const mrp = Number($('sMrp').value) || 0;
+  const sp = Number($('sSp').value) || 0;
+  const cp = Number($('sCp').value) || 0;
+  const qty = Number($('sQty').value) || 0;
+  if (!name) return toast('Enter item name', 'error');
+  try {
+    const col = db.collection('shops').doc(currentUser.uid).collection('stock');
+    if (id) { await col.doc(id).update({ name, mrp, sp, cp, qty }); toast('Item updated', 'success'); }
+    else { await col.add({ name, mrp, sp, cp, qty }); toast('Item added', 'success'); }
+    $('stockModal')?.remove();
+    renderStock();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function deleteStock(id) {
+  if (!confirm('Delete this stock item?')) return;
+  try {
+    await db.collection('shops').doc(currentUser.uid).collection('stock').doc(id).delete();
+    toast('Item deleted', 'success');
+    renderStock();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ============================================================
+// BILLING
+// ============================================================
+let billingStock = [];
+
+async function renderBilling() {
+  const pc = $('pageContent');
+  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+  try {
+    const snap = await db.collection('shops').doc(currentUser.uid).collection('stock').get();
+    billingStock = [];
+    snap.forEach(d => billingStock.push({ id: d.id, ...d.data() }));
+    renderBillingUI();
+  } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
+}
+
+function renderBillingUI() {
+  const subtotal = cart.reduce((s, c) => s + (c.sp * c.cartQty), 0);
+  const discAmt = Number($('billDiscAmt')?.value) || 0;
+  const discPct = Number($('billDiscPct')?.value) || 0;
+  const gstPct = Number($('billGstPct')?.value) || 0;
+  const discTotal = discAmt + (subtotal * discPct / 100);
+  const afterDisc = subtotal - discTotal;
+  const gstAmt = afterDisc * gstPct / 100;
+  const grandTotal = Math.round(afterDisc + gstAmt);
+  const paid = Number($('billPaid')?.value) || 0;
+  const due = grandTotal - paid;
+
+  const pc = $('pageContent');
+  pc.innerHTML = `
+    <div class="billing-layout">
+      <div>
+        <div class="card">
+          <h3 class="mb-10"><i class="fas fa-user"></i> Customer Details</h3>
+          <div class="grid-2">
+            <div class="form-group"><label>Customer Name</label><input type="text" id="custName" value="${$('custName')?.value || ''}"></div>
+            <div class="form-group"><label>Mobile</label><input type="tel" id="custMobile" value="${$('custMobile')?.value || ''}" maxlength="10"></div>
+          </div>
+          <div class="form-group"><label>Address</label><input type="text" id="custAddress" value="${$('custAddress')?.value || ''}"></div>
+        </div>
+        <div class="card">
+          <h3 class="mb-10"><i class="fas fa-search"></i> Search & Add Items</h3>
+          <div class="search-dropdown">
+            <input type="text" id="itemSearch" placeholder="Type item name to search..." oninput="searchItems()" onfocus="searchItems()" autocomplete="off" style="width:100%;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary)">
+            <div class="search-results" id="searchResults"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="mb-10"><i class="fas fa-cart-shopping"></i> Cart (${cart.length} items)</h3>
+          ${cart.length === 0 ? '<div class="empty-state"><i class="fas fa-cart-plus"></i><p>Cart is empty</p></div>' : cart.map((c, i) => `
+            <div class="cart-item">
+              <div class="cart-item-info"><h4>${c.name}</h4><p>SP: ${formatCurrency(c.sp)} | Stock: ${c.qty}</p></div>
+              <div class="qty-controls">
+                <button onclick="updateCartQty(${i},-1)"><i class="fas fa-minus"></i></button>
+                <span>${c.cartQty}</span>
+                <button onclick="updateCartQty(${i},1)"><i class="fas fa-plus"></i></button>
+              </div>
+              <div class="cart-total">${formatCurrency(c.sp * c.cartQty)}</div>
+              <div class="cart-remove" onclick="removeFromCart(${i})"><i class="fas fa-trash"></i></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div>
+        <div class="card" style="position:sticky;top:20px">
+          <h3 class="mb-10"><i class="fas fa-calculator"></i> Bill Summary</h3>
+          <div class="grid-2 mb-10">
+            <div class="form-group"><label>Discount ₹</label><input type="number" id="billDiscAmt" value="${discAmt}" oninput="renderBillingUI()"></div>
+            <div class="form-group"><label>Discount %</label><input type="number" id="billDiscPct" value="${discPct}" oninput="renderBillingUI()"></div>
+          </div>
+          <div class="form-group"><label>GST %</label><input type="number" id="billGstPct" value="${gstPct}" oninput="renderBillingUI()"></div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
+            <div class="summary-row"><span>Subtotal</span><span>${formatCurrency(subtotal)}</span></div>
+            <div class="summary-row"><span>Discount</span><span class="text-danger">-${formatCurrency(discTotal)}</span></div>
+            <div class="summary-row"><span>GST (${gstPct}%)</span><span>+${formatCurrency(gstAmt)}</span></div>
+            <div class="summary-row total"><span>Grand Total</span><span>${formatCurrency(grandTotal)}</span></div>
+          </div>
+          <div class="form-group mt-10"><label>Paid Amount (₹)</label><input type="number" id="billPaid" value="${paid}" oninput="renderBillingUI()"></div>
+          <div class="summary-row"><span>Due Amount</span><span class="${due > 0 ? 'text-danger' : 'text-success'}" style="font-weight:700">${formatCurrency(due < 0 ? 0 : due)}</span></div>
+          <button class="btn btn-success w-full mt-10" onclick="saveBill(${grandTotal},${paid},${due < 0 ? 0 : due},${discTotal},${gstAmt},${subtotal})"><i class="fas fa-save"></i> Save & Print Invoice</button>
+          <button class="btn btn-outline w-full mt-10" onclick="cart=[];renderBillingUI()"><i class="fas fa-times"></i> Clear Cart</button>
+        </div>
+      </div>
+    </div>
+  `;
+  // Reattach click outside listener for search
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-dropdown')) { const sr = $('searchResults'); if (sr) sr.classList.remove('show'); }
+  });
+}
+
+function searchItems() {
+  const q = ($('itemSearch')?.value || '').toLowerCase();
+  const results = billingStock.filter(s => s.name.toLowerCase().includes(q)).slice(0, 15);
+  const sr = $('searchResults');
+  if (!sr) return;
+  if (results.length === 0 || !q) { sr.classList.remove('show'); sr.innerHTML = ''; return; }
+  sr.classList.add('show');
+  sr.innerHTML = results.map(s => `
+    <div class="search-result-item" onclick="addToCart('${s.id}')">
+      <strong>${s.name}</strong> - SP: ${formatCurrency(s.sp)}
+      <div class="item-stock">Stock: ${s.qty} | MRP: ${formatCurrency(s.mrp)}</div>
+    </div>
+  `).join('');
+}
+
+function addToCart(stockId) {
+  const item = billingStock.find(s => s.id === stockId);
+  if (!item) return;
+  const existing = cart.find(c => c.id === stockId);
+  if (existing) {
+    if (existing.cartQty >= item.qty) return toast('Not enough stock', 'warning');
+    existing.cartQty++;
+  } else {
+    if (item.qty <= 0) return toast('Out of stock', 'warning');
+    cart.push({ ...item, cartQty: 1 });
+  }
+  const sr = $('searchResults'); if (sr) sr.classList.remove('show');
+  const is = $('itemSearch'); if (is) is.value = '';
+  renderBillingUI();
+}
+
+function updateCartQty(idx, delta) {
+  cart[idx].cartQty += delta;
+  if (cart[idx].cartQty <= 0) cart.splice(idx, 1);
+  else if (cart[idx].cartQty > cart[idx].qty) { cart[idx].cartQty = cart[idx].qty; toast('Max stock reached', 'warning'); }
+  renderBillingUI();
+}
+
+function removeFromCart(idx) { cart.splice(idx, 1); renderBillingUI(); }
+
+async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal) {
+  if (cart.length === 0) return toast('Cart is empty', 'error');
+  try {
+    const uid = currentUser.uid;
+    const shopRef = db.collection('shops').doc(uid);
+
+    // Increment invoice counter
+    const shopDoc = await shopRef.get();
+    let counter = (shopDoc.data().invoiceCounter || 0) + 1;
+    await shopRef.update({ invoiceCounter: counter });
+    const invoiceNumber = 'INV-' + String(counter).padStart(5, '0');
+
+    const invoice = {
+      invoiceNumber,
+      date: todayStr(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      customerName: $('custName')?.value?.trim() || '',
+      customerMobile: $('custMobile')?.value?.trim() || '',
+      customerAddress: $('custAddress')?.value?.trim() || '',
+      items: cart.map(c => ({ stockId: c.id, name: c.name, mrp: c.mrp, sp: c.sp, qty: c.cartQty, total: c.sp * c.cartQty })),
+      subtotal, discount, gstAmt, grandTotal, paid, due,
+      payments: paid > 0 ? [{ amount: paid, method: 'cash', date: todayStr() }] : []
     };
 
-    /* ==========================================================================
-       MODULE 2: BILLING & POS
-       ========================================================================== */
-    const billing = {
-        init: () => {
-            el('bill-rows-container').innerHTML = '';
-            billing.addRow();
-            el('btn-wa-share').classList.add('hidden'); 
-        },
-        
-        checkCustomer: (input) => {
-            const mob = input.value;
-            if (mob.length > 5 && shop.invoices) {
-                const last = [...shop.invoices].reverse().find(i => i.cMob === mob);
-                if (last) {
-                    el('b-cname').value = last.cName;
-                    el('b-caddr').value = last.cAddr;
-                }
-            }
-        },
+    await shopRef.collection('invoices').add(invoice);
 
-        addRow: () => {
-            const d = document.createElement('div');
-            d.className = 'list-item grid-4';
-            d.style.alignItems = 'end';
-            d.innerHTML = `
-                <div style="grid-column:span 4">
-                    <input type="text" class="b-item" style="width:100%" placeholder="Search Item..." onchange="billing.fill(this)">
-                </div>
-                <div><label>MRP</label><input type="number" class="b-mrp" readonly></div>
-                <div><label>Rate</label><input type="number" class="b-price" oninput="billing.calc()"></div>
-                <div><label>Qty</label><input type="number" class="b-qty" value="1" oninput="billing.calc()"></div>
-                <div><button class="btn-sm btn-danger" style="width:100%; margin-bottom:12px" onclick="this.parentElement.parentElement.remove();billing.calc()">X</button></div>
+    // Reduce stock
+    const batch = db.batch();
+    cart.forEach(c => {
+      const ref = shopRef.collection('stock').doc(c.id);
+      batch.update(ref, { qty: firebase.firestore.FieldValue.increment(-c.cartQty) });
+    });
+    await batch.commit();
+
+    toast('Invoice saved: ' + invoiceNumber, 'success');
+
+    // Print
+    printInvoice(invoice);
+
+    cart = [];
+    renderBillingUI();
+  } catch (e) { toast('Error saving bill: ' + e.message, 'error'); console.error(e); }
+}
+
+// ============================================================
+// PRINT INVOICE
+// ============================================================
+function printInvoice(inv) {
+  const format = shopData.printFormat || 'a4';
+  const isThermal = format === 'thermal';
+  const logo = shopData.logoBase64 ? `<img src="${shopData.logoBase64}" style="max-height:60px;margin-bottom:5px">` : '';
+
+  let html = '';
+  if (isThermal) {
+    html = `<div class="thermal" style="text-align:center;font-family:monospace">
+      ${logo}
+      <h3 style="margin:0">${shopData.shopName}</h3>
+      <p style="font-size:10px;margin:2px 0">${shopData.shopAddress || ''}</p>
+      <p style="font-size:10px;margin:2px 0">Ph: ${shopData.ownerMobile || ''}</p>
+      <hr style="border:none;border-top:1px dashed #000">
+      <p><strong>${inv.invoiceNumber}</strong> | ${inv.date}</p>
+      ${inv.customerName ? `<p>Customer: ${inv.customerName}</p>` : ''}
+      <hr style="border:none;border-top:1px dashed #000">
+      <table style="width:100%;font-size:11px"><thead><tr><th style="text-align:left">Item</th><th>Qty</th><th style="text-align:right">Amt</th></tr></thead><tbody>
+      ${inv.items.map(it => `<tr><td style="text-align:left">${it.name}</td><td style="text-align:center">${it.qty}</td><td style="text-align:right">${it.total}</td></tr>`).join('')}
+      </tbody></table>
+      <hr style="border:none;border-top:1px dashed #000">
+      <p>Subtotal: ₹${inv.subtotal} | Disc: ₹${inv.discount}</p>
+      <p>GST: ₹${inv.gstAmt}</p>
+      <p style="font-size:14px"><strong>Total: ₹${inv.grandTotal}</strong></p>
+      <p>Paid: ₹${inv.paid} | Due: ₹${inv.due}</p>
+      <hr style="border:none;border-top:1px dashed #000">
+      <p style="font-size:9px">Powered by AURAA BILLING PRO ${APP_VERSION}</p>
+      <p style="font-size:9px">Support: ${WHATSAPP} | @${INSTAGRAM}</p>
+    </div>`;
+  } else {
+    html = `<div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #6c5ce7;padding-bottom:15px">
+        <div>${logo}<h1 style="margin:0;font-size:24px;color:#6c5ce7">${shopData.shopName}</h1><p style="margin:2px 0;font-size:12px;color:#666">${shopData.shopAddress || ''}</p><p style="margin:2px 0;font-size:12px;color:#666">Ph: ${shopData.ownerMobile || ''}</p></div>
+        <div style="text-align:right"><h2 style="margin:0;color:#6c5ce7">INVOICE</h2><p style="margin:3px 0"><strong>${inv.invoiceNumber}</strong></p><p style="margin:3px 0">Date: ${inv.date}</p></div>
+      </div>
+      <div style="margin:15px 0;padding:10px;background:#f8f8f8;border-radius:8px">
+        <strong>Bill To:</strong><br>${inv.customerName || 'Walk-in Customer'}${inv.customerMobile ? '<br>Ph: ' + inv.customerMobile : ''}${inv.customerAddress ? '<br>' + inv.customerAddress : ''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin:15px 0">
+        <thead><tr style="background:#6c5ce7;color:#fff"><th style="padding:10px;text-align:left">#</th><th style="padding:10px;text-align:left">Item</th><th style="padding:10px;text-align:right">MRP</th><th style="padding:10px;text-align:right">SP</th><th style="padding:10px;text-align:center">Qty</th><th style="padding:10px;text-align:right">Total</th></tr></thead>
+        <tbody>${inv.items.map((it, i) => `<tr style="border-bottom:1px solid #eee"><td style="padding:8px">${i + 1}</td><td style="padding:8px">${it.name}</td><td style="padding:8px;text-align:right">₹${it.mrp}</td><td style="padding:8px;text-align:right">₹${it.sp}</td><td style="padding:8px;text-align:center">${it.qty}</td><td style="padding:8px;text-align:right">₹${it.total}</td></tr>`).join('')}</tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end"><div style="width:300px">
+        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>Subtotal:</span><span>₹${inv.subtotal}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0;color:#e74c6c"><span>Discount:</span><span>-₹${inv.discount}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>GST:</span><span>+₹${inv.gstAmt}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:18px;font-weight:700;border-top:2px solid #6c5ce7;color:#6c5ce7"><span>Grand Total:</span><span>₹${inv.grandTotal}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>Paid:</span><span style="color:green">₹${inv.paid}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>Due:</span><span style="color:${inv.due > 0 ? 'red' : 'green'}">₹${inv.due}</span></div>
+      </div></div>
+      <div style="text-align:center;margin-top:30px;padding-top:15px;border-top:1px solid #ddd;font-size:11px;color:#999">
+        <p>Thank you for your business!</p>
+        <p>Powered by AURAA BILLING PRO ${APP_VERSION} | Support: ${WHATSAPP} | @${INSTAGRAM}</p>
+      </div>
+    </div>`;
+  }
+  $('printArea').innerHTML = html;
+  setTimeout(() => { window.print(); }, 300);
+}
+
+// ============================================================
+// INVOICE HISTORY
+// ============================================================
+async function renderHistory() {
+  const pc = $('pageContent');
+  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading invoices...</div>';
+  try {
+    const snap = await db.collection('shops').doc(currentUser.uid).collection('invoices').orderBy('createdAt', 'desc').limit(100).get();
+    const invoices = [];
+    snap.forEach(d => invoices.push({ id: d.id, ...d.data() }));
+
+    pc.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-file-invoice"></i> Invoices (${invoices.length})</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="invSearch" placeholder="Search..." style="padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);width:180px" oninput="filterInvTable()">
+            <input type="date" id="invDateFrom" style="padding:8px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary)" onchange="filterInvTable()">
+            <input type="date" id="invDateTo" style="padding:8px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary)" onchange="filterInvTable()">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Due</th><th>Actions</th></tr></thead>
+          <tbody id="invTableBody">
+          ${invoices.length === 0 ? '<tr><td colspan="7" class="text-center text-muted">No invoices</td></tr>' : invoices.map(inv => `
+            <tr class="inv-row" data-search="${(inv.invoiceNumber + ' ' + inv.customerName + ' ' + inv.customerMobile).toLowerCase()}" data-date="${inv.date}">
+              <td><strong>${inv.invoiceNumber || '-'}</strong></td>
+              <td>${inv.date}</td>
+              <td>${inv.customerName || 'Walk-in'}<br><span class="text-muted" style="font-size:.75rem">${inv.customerMobile || ''}</span></td>
+              <td>${formatCurrency(inv.grandTotal)}</td>
+              <td class="text-success">${formatCurrency(inv.paid)}</td>
+              <td class="${inv.due > 0 ? 'text-danger' : 'text-success'}">${formatCurrency(inv.due)}</td>
+              <td>
+                <button class="btn btn-info btn-xs" onclick="viewInvoice('${inv.id}')"><i class="fas fa-eye"></i></button>
+                <button class="btn btn-warning btn-xs" onclick="reprintInvoice('${inv.id}')"><i class="fas fa-print"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="deleteInvoice('${inv.id}')"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          `).join('')}
+          </tbody></table>
+        </div>
+      </div>
+    `;
+  } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
+}
+
+function filterInvTable() {
+  const q = ($('invSearch')?.value || '').toLowerCase();
+  const from = $('invDateFrom')?.value || '';
+  const to = $('invDateTo')?.value || '';
+  qsa('.inv-row').forEach(r => {
+    const matchSearch = !q || r.dataset.search.includes(q);
+    const d = r.dataset.date;
+    const matchFrom = !from || d >= from;
+    const matchTo = !to || d <= to;
+    r.style.display = (matchSearch && matchFrom && matchTo) ? '' : 'none';
+  });
+}
+
+async function viewInvoice(id) {
+  try {
+    const doc = await db.collection('shops').doc(currentUser.uid).collection('invoices').doc(id).get();
+    if (!doc.exists) return toast('Invoice not found', 'error');
+    const inv = doc.data();
+    const html = `
+      <div class="modal-overlay active" id="viewInvModal" onclick="if(event.target===this)this.remove()">
+        <div class="modal modal-lg">
+          <div class="modal-header"><h3>${inv.invoiceNumber}</h3><button class="modal-close" onclick="$('viewInvModal').remove()"><i class="fas fa-times"></i></button></div>
+          <div class="grid-2 mb-10">
+            <div><strong>Date:</strong> ${inv.date}</div>
+            <div><strong>Customer:</strong> ${inv.customerName || 'Walk-in'} ${inv.customerMobile ? '(' + inv.customerMobile + ')' : ''}</div>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>#</th><th>Item</th><th>SP</th><th>Qty</th><th>Total</th></tr></thead><tbody>
+            ${inv.items.map((it, i) => `<tr><td>${i + 1}</td><td>${it.name}</td><td>${formatCurrency(it.sp)}</td><td>${it.qty}</td><td>${formatCurrency(it.total)}</td></tr>`).join('')}
+            </tbody></table>
+          </div>
+          <div style="max-width:300px;margin-left:auto;margin-top:15px">
+            <div class="summary-row"><span>Subtotal</span><span>${formatCurrency(inv.subtotal)}</span></div>
+            <div class="summary-row"><span>Discount</span><span class="text-danger">-${formatCurrency(inv.discount)}</span></div>
+            <div class="summary-row"><span>GST</span><span>+${formatCurrency(inv.gstAmt)}</span></div>
+            <div class="summary-row total"><span>Grand Total</span><span>${formatCurrency(inv.grandTotal)}</span></div>
+            <div class="summary-row"><span>Paid</span><span class="text-success">${formatCurrency(inv.paid)}</span></div>
+            <div class="summary-row"><span>Due</span><span class="${inv.due > 0 ? 'text-danger' : 'text-success'}">${formatCurrency(inv.due)}</span></div>
+          </div>
+          ${inv.payments && inv.payments.length > 0 ? `
+            <div class="mt-20"><h4>Payment History</h4>
+            ${inv.payments.map(p => `<div class="summary-row"><span>${p.date} (${p.method})</span><span>${formatCurrency(p.amount)}</span></div>`).join('')}
+            </div>
+          ` : ''}
+          <div class="mt-20 flex-between">
+            <button class="btn btn-warning btn-sm" onclick="$('viewInvModal').remove();reprintInvoice('${id}')"><i class="fas fa-print"></i> Print</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function reprintInvoice(id) {
+  try {
+    const doc = await db.collection('shops').doc(currentUser.uid).collection('invoices').doc(id).get();
+    if (!doc.exists) return toast('Invoice not found', 'error');
+    printInvoice(doc.data());
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function deleteInvoice(id) {
+  if (!confirm('Delete this invoice? Stock will be restored.')) return;
+  try {
+    const uid = currentUser.uid;
+    const doc = await db.collection('shops').doc(uid).collection('invoices').doc(id).get();
+    if (!doc.exists) return toast('Not found', 'error');
+    const inv = doc.data();
+
+    // Restore stock
+    const batch = db.batch();
+    inv.items.forEach(it => {
+      if (it.stockId) {
+        batch.update(db.collection('shops').doc(uid).collection('stock').doc(it.stockId), {
+          qty: firebase.firestore.FieldValue.increment(it.qty)
+        });
+      }
+    });
+    batch.delete(db.collection('shops').doc(uid).collection('invoices').doc(id));
+    await batch.commit();
+    toast('Invoice deleted, stock restored', 'success');
+    renderHistory();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ============================================================
+// PAYMENTS / DUE TRACKING
+// ============================================================
+async function renderPayments() {
+  const pc = $('pageContent');
+  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+  try {
+    const snap = await db.collection('shops').doc(currentUser.uid).collection('invoices').where('due', '>', 0).get();
+    const dues = [];
+    let totalDue = 0;
+    snap.forEach(d => { const data = d.data(); totalDue += Number(data.due || 0); dues.push({ id: d.id, ...data }); });
+
+    pc.innerHTML = `
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div class="stat-card"><div class="stat-icon icon-due"><i class="fas fa-hand-holding-dollar"></i></div><div class="stat-value">${formatCurrency(totalDue)}</div><div class="stat-label">Total Pending Due</div></div>
+        <div class="stat-card"><div class="stat-icon icon-bills"><i class="fas fa-file-invoice"></i></div><div class="stat-value">${dues.length}</div><div class="stat-label">Pending Invoices</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-money-bill-wave"></i> Due Invoices</h3></div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Invoice</th><th>Customer</th><th>Total</th><th>Paid</th><th>Due</th><th>Action</th></tr></thead>
+          <tbody>
+          ${dues.length === 0 ? '<tr><td colspan="6" class="text-center text-muted">No pending dues 🎉</td></tr>' : dues.map(d => `
+            <tr>
+              <td>${d.invoiceNumber || '-'}</td>
+              <td>${d.customerName || 'Walk-in'}<br><span class="text-muted" style="font-size:.75rem">${d.customerMobile || ''}</span></td>
+              <td>${formatCurrency(d.grandTotal)}</td>
+              <td class="text-success">${formatCurrency(d.paid)}</td>
+              <td class="text-danger"><strong>${formatCurrency(d.due)}</strong></td>
+              <td><button class="btn btn-success btn-xs" onclick="showPaymentModal('${d.id}',${d.due})"><i class="fas fa-money-bill"></i> Record Payment</button></td>
+            </tr>
+          `).join('')}
+          </tbody></table>
+        </div>
+      </div>
+    `;
+  } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
+}
+
+function showPaymentModal(invId, dueAmt) {
+  const html = `
+    <div class="modal-overlay active" id="payModal" onclick="if(event.target===this)this.remove()">
+      <div class="modal">
+        <div class="modal-header"><h3>Record Payment</h3><button class="modal-close" onclick="$('payModal').remove()"><i class="fas fa-times"></i></button></div>
+        <p class="mb-10">Due Amount: <strong class="text-danger">${formatCurrency(dueAmt)}</strong></p>
+        <div class="form-group"><label>Payment Amount (₹)</label><input type="number" id="payAmt" max="${dueAmt}" value="${dueAmt}"></div>
+        <div class="form-group"><label>Payment Method</label>
+          <select id="payMethod"><option value="cash">Cash</option><option value="upi">UPI</option><option value="card">Card</option><option value="bank">Bank Transfer</option></select>
+        </div>
+        <button class="btn btn-success w-full" onclick="recordPayment('${invId}',${dueAmt})"><i class="fas fa-check"></i> Record Payment</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function recordPayment(invId, currentDue) {
+  const amt = Number($('payAmt').value) || 0;
+  const method = $('payMethod').value;
+  if (amt <= 0) return toast('Enter valid amount', 'error');
+  if (amt > currentDue) return toast('Amount exceeds due', 'error');
+  try {
+    const ref = db.collection('shops').doc(currentUser.uid).collection('invoices').doc(invId);
+    await ref.update({
+      paid: firebase.firestore.FieldValue.increment(amt),
+      due: firebase.firestore.FieldValue.increment(-amt),
+      payments: firebase.firestore.FieldValue.arrayUnion({ amount: amt, method, date: todayStr() })
+    });
+    toast('Payment recorded!', 'success');
+    $('payModal')?.remove();
+    renderPayments();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ============================================================
+// EXPENSES
+// ============================================================
+async function renderExpenses() {
+  const pc = $('pageContent');
+  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+  try {
+    const snap = await db.collection('shops').doc(currentUser.uid).collection('expenses').orderBy('date', 'desc').limit(100).get();
+    const exps = [];
+    let total = 0;
+    snap.forEach(d => { const data = d.data(); total += Number(data.amount || 0); exps.push({ id: d.id, ...data }); });
+
+    pc.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-receipt"></i> Expenses (Total: ${formatCurrency(total)})</h3>
+          <button class="btn btn-primary btn-sm" onclick="showExpenseModal()"><i class="fas fa-plus"></i> Add Expense</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Action</th></tr></thead>
+          <tbody>
+          ${exps.length === 0 ? '<tr><td colspan="4" class="text-center text-muted">No expenses</td></tr>' : exps.map(e => `
+            <tr>
+              <td>${e.date}</td>
+              <td>${e.description || '-'}</td>
+              <td class="text-danger">${formatCurrency(e.amount)}</td>
+              <td><button class="btn btn-danger btn-xs" onclick="deleteExpense('${e.id}')"><i class="fas fa-trash"></i></button></td>
+            </tr>
+          `).join('')}
+          </tbody></table>
+        </div>
+      </div>
+    `;
+  } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
+}
+
+function showExpenseModal() {
+  const html = `
+    <div class="modal-overlay active" id="expModal" onclick="if(event.target===this)this.remove()">
+      <div class="modal">
+        <div class="modal-header"><h3>Add Expense</h3><button class="modal-close" onclick="$('expModal').remove()"><i class="fas fa-times"></i></button></div>
+        <div class="form-group"><label>Date</label><input type="date" id="expDate" value="${todayStr()}"></div>
+        <div class="form-group"><label>Description</label><input type="text" id="expDesc" placeholder="e.g. Electricity Bill"></div>
+        <div class="form-group"><label>Amount (₹)</label><input type="number" id="expAmt" placeholder="0"></div>
+        <button class="btn btn-primary w-full" onclick="saveExpense()"><i class="fas fa-save"></i> Save Expense</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function saveExpense() {
+  const date = $('expDate').value;
+  const description = $('expDesc').value.trim();
+  const amount = Number($('expAmt').value) || 0;
+  if (!description) return toast('Enter description', 'error');
+  if (amount <= 0) return toast('Enter valid amount', 'error');
+  try {
+    await db.collection('shops').doc(currentUser.uid).collection('expenses').add({ date, description, amount });
+    toast('Expense added', 'success');
+    $('expModal')?.remove();
+    renderExpenses();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function deleteExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  try {
+    await db.collection('shops').doc(currentUser.uid).collection('expenses').doc(id).delete();
+    toast('Expense deleted', 'success');
+    renderExpenses();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSettings() {
+  const pc = $('pageContent');
+  pc.innerHTML = `
+    <div class="card">
+      <h3 class="mb-20"><i class="fas fa-store"></i> Shop Settings</h3>
+      <div class="grid-2">
+        <div class="form-group"><label>Shop Name</label><input type="text" id="setShopName" value="${shopData.shopName || ''}"></div>
+        <div class="form-group"><label>Shop Address</label><input type="text" id="setShopAddr" value="${shopData.shopAddress || ''}"></div>
+      </div>
+      <div class="form-group"><label>Shop Logo (Base64 or URL)</label><input type="file" id="setLogoFile" accept="image/*" onchange="handleLogoUpload()" style="padding:8px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);width:100%"></div>
+      ${shopData.logoBase64 ? `<img src="${shopData.logoBase64}" style="max-height:60px;margin:10px 0;border-radius:8px">` : ''}
+      <button class="btn btn-primary mt-10" onclick="saveShopSettings()"><i class="fas fa-save"></i> Save Shop Settings</button>
+    </div>
+
+    <div class="card">
+      <h3 class="mb-20"><i class="fas fa-print"></i> Print Settings</h3>
+      <div class="form-group"><label>Invoice Print Format</label>
+        <select id="setPrintFormat" style="width:100%;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary)">
+          <option value="a4" ${shopData.printFormat === 'a4' ? 'selected' : ''}>A4 Paper</option>
+          <option value="thermal" ${shopData.printFormat === 'thermal' ? 'selected' : ''}>Thermal 80mm</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="savePrintSettings()"><i class="fas fa-save"></i> Save Print Settings</button>
+    </div>
+
+    <div class="card">
+      <h3 class="mb-20"><i class="fas fa-user-shield"></i> Staff Mode Settings</h3>
+      <div class="form-group">
+        <label><input type="checkbox" id="setStaffMode" ${shopData.staffModeEnabled ? 'checked' : ''} style="margin-right:8px"> Enable Staff Mode</label>
+      </div>
+      <div class="form-group"><label>Owner PIN (4 digits)</label><input type="password" id="setOwnerPin" value="${shopData.ownerPin || '1234'}" maxlength="4"></div>
+      <button class="btn btn-primary" onclick="saveStaffSettings()"><i class="fas fa-save"></i> Save Staff Settings</button>
+    </div>
+
+    <div class="card">
+      <h3 class="mb-20"><i class="fas fa-key"></i> Change Password</h3>
+      <div class="form-group"><label>Current Password</label><input type="password" id="oldPass" placeholder="Current password"></div>
+      <div class="form-group"><label>New Password</label><input type="password" id="newPass" placeholder="New password (min 6 chars)"></div>
+      <button class="btn btn-warning" onclick="changePassword()"><i class="fas fa-key"></i> Change Password</button>
+    </div>
+
+    <div class="card">
+      <h3 class="mb-20"><i class="fas fa-info-circle"></i> Subscription Info</h3>
+      <div class="grid-2">
+        <div><strong>Status:</strong> ${shopData.subscriptionActive ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-warning">Trial</span>'}</div>
+        <div><strong>Plan:</strong> ${shopData.planType || 'Free Trial'}</div>
+        <div><strong>Trial End:</strong> ${shopData.trialEndDate || '-'}</div>
+        <div><strong>Sub End:</strong> ${shopData.subscriptionEndDate || '-'}</div>
+      </div>
+      <div class="mt-10">
+        <a href="https://wa.me/91${WHATSAPP}?text=Hi%20I%20want%20to%20renew/subscribe.%20Mobile%3A%20${shopData.ownerMobile}" target="_blank" class="btn btn-success btn-sm"><i class="fab fa-whatsapp"></i> Subscribe / Renew</a>
+      </div>
+    </div>
+  `;
+}
+
+function handleLogoUpload() {
+  const file = $('setLogoFile').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      await db.collection('shops').doc(currentUser.uid).update({ logoBase64: e.target.result });
+      shopData.logoBase64 = e.target.result;
+      toast('Logo uploaded', 'success');
+      renderSettings();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveShopSettings() {
+  try {
+    const shopName = $('setShopName').value.trim();
+    const shopAddress = $('setShopAddr').value.trim();
+    await db.collection('shops').doc(currentUser.uid).update({ shopName, shopAddress });
+    shopData.shopName = shopName;
+    shopData.shopAddress = shopAddress;
+    toast('Shop settings saved', 'success');
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function savePrintSettings() {
+  try {
+    const printFormat = $('setPrintFormat').value;
+    await db.collection('shops').doc(currentUser.uid).update({ printFormat });
+    shopData.printFormat = printFormat;
+    toast('Print settings saved', 'success');
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function saveStaffSettings() {
+  try {
+    const staffModeEnabled = $('setStaffMode').checked;
+    const ownerPin = $('setOwnerPin').value.trim();
+    if (ownerPin.length !== 4) return toast('PIN must be 4 digits', 'error');
+    await db.collection('shops').doc(currentUser.uid).update({ staffModeEnabled, ownerPin });
+    shopData.staffModeEnabled = staffModeEnabled;
+    shopData.ownerPin = ownerPin;
+    staffMode = staffModeEnabled;
+    toast('Staff settings saved', 'success');
+    renderApp();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function changePassword() {
+  const oldP = $('oldPass').value;
+  const newP = $('newPass').value;
+  if (!oldP || !newP) return toast('Fill both fields', 'error');
+  if (newP.length < 6) return toast('Min 6 characters', 'error');
+  try {
+    const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, oldP);
+    await currentUser.reauthenticateWithCredential(cred);
+    await currentUser.updatePassword(newP);
+    toast('Password changed successfully', 'success');
+    $('oldPass').value = '';
+    $('newPass').value = '';
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ============================================================
+// OWNER PIN MODAL (Staff Mode Unlock)
+// ============================================================
+function showOwnerPinModal() {
+  const html = `
+    <div class="modal-overlay active" id="pinModal" onclick="if(event.target===this)this.remove()">
+      <div class="modal" style="max-width:350px">
+        <div class="modal-header"><h3><i class="fas fa-key"></i> Owner Mode</h3><button class="modal-close" onclick="$('pinModal').remove()"><i class="fas fa-times"></i></button></div>
+        <p class="mb-10 text-muted">Enter owner PIN to unlock</p>
+        <div class="form-group"><input type="password" id="ownerPinInput" placeholder="Enter 4-digit PIN" maxlength="4" style="text-align:center;font-size:1.5rem;letter-spacing:10px"></div>
+        <button class="btn btn-primary w-full" onclick="verifyOwnerPin()"><i class="fas fa-unlock"></i> Unlock</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+  setTimeout(() => $('ownerPinInput')?.focus(), 100);
+}
+
+function verifyOwnerPin() {
+  const pin = $('ownerPinInput').value;
+  if (pin === shopData.ownerPin) {
+    staffMode = false;
+    $('pinModal')?.remove();
+    toast('Owner mode unlocked!', 'success');
+    renderApp();
+  } else {
+    toast('Incorrect PIN', 'error');
+  }
+}
+
+// ============================================================
+// BACKUP & RESTORE
+// ============================================================
+function renderBackup() {
+  const pc = $('pageContent');
+  pc.innerHTML = `
+    <div class="card">
+      <h3 class="mb-20"><i class="fas fa-download"></i> Backup Data</h3>
+      <p class="text-muted mb-10">Download all your shop data as a JSON backup file.</p>
+      <button class="btn btn-primary" onclick="downloadBackup()"><i class="fas fa-download"></i> Download Backup</button>
+    </div>
+    <div class="card">
+      <h3 class="mb-20"><i class="fas fa-upload"></i> Restore Data</h3>
+      <p class="text-danger mb-10"><i class="fas fa-exclamation-triangle"></i> Warning: Restoring will delete all current data and replace with backup data!</p>
+      <div class="form-group"><input type="file" id="restoreFile" accept=".json" style="padding:8px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);width:100%"></div>
+      <button class="btn btn-danger" onclick="restoreBackup()"><i class="fas fa-upload"></i> Restore Backup</button>
+    </div>
+  `;
+}
+
+async function downloadBackup() {
+  try {
+    const uid = currentUser.uid;
+    const data = { shopData: shopData, stock: [], invoices: [], expenses: [] };
+
+    const stockSnap = await db.collection('shops').doc(uid).collection('stock').get();
+    stockSnap.forEach(d => data.stock.push({ id: d.id, ...d.data() }));
+
+    const invSnap = await db.collection('shops').doc(uid).collection('invoices').get();
+    invSnap.forEach(d => data.invoices.push({ id: d.id, ...d.data() }));
+
+    const expSnap = await db.collection('shops').doc(uid).collection('expenses').get();
+    expSnap.forEach(d => data.expenses.push({ id: d.id, ...d.data() }));
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `auraa_backup_${shopData.shopName}_${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Backup downloaded!', 'success');
+  } catch (e) { toast('Backup failed: ' + e.message, 'error'); }
+}
+
+async function restoreBackup() {
+  const file = $('restoreFile').files[0];
+  if (!file) return toast('Select a backup file', 'error');
+  if (!confirm('WARNING: This will delete ALL current data and restore from backup. Continue?')) return;
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    const uid = currentUser.uid;
+
+    // Delete current subcollections
+    for (const col of ['stock', 'invoices', 'expenses']) {
+      const snap = await db.collection('shops').doc(uid).collection(col).get();
+      const batch = db.batch();
+      snap.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+
+    // Restore stock
+    for (const item of (data.stock || [])) {
+      const { id, ...rest } = item;
+      await db.collection('shops').doc(uid).collection('stock').add(rest);
+    }
+
+    // Restore invoices
+    let maxCounter = 0;
+    for (const item of (data.invoices || [])) {
+      const { id, ...rest } = item;
+      await db.collection('shops').doc(uid).collection('invoices').add(rest);
+      const num = parseInt((rest.invoiceNumber || '').replace('INV-', '')) || 0;
+      if (num > maxCounter) maxCounter = num;
+    }
+
+    // Restore expenses
+    for (const item of (data.expenses || [])) {
+      const { id, ...rest } = item;
+      await db.collection('shops').doc(uid).collection('expenses').add(rest);
+    }
+
+    // Update invoice counter
+    await db.collection('shops').doc(uid).update({ invoiceCounter: maxCounter });
+    shopData.invoiceCounter = maxCounter;
+
+    toast('Backup restored successfully!', 'success');
+    renderDashboard();
+  } catch (e) { toast('Restore failed: ' + e.message, 'error'); console.error(e); }
+}
+
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+let adminUnlocked = false;
+
+function renderAdmin() {
+  const pc = $('pageContent');
+  if (currentUser.uid !== ADMIN_UID) { pc.innerHTML = '<div class="text-danger">Access denied</div>'; return; }
+
+  if (!adminUnlocked) {
+    pc.innerHTML = `
+      <div class="card" style="max-width:400px;margin:40px auto;text-align:center">
+        <h3 class="mb-20"><i class="fas fa-shield-halved"></i> Admin Login</h3>
+        <div class="form-group"><input type="password" id="adminPass" placeholder="Enter admin password"></div>
+        <button class="btn btn-primary" onclick="unlockAdmin()"><i class="fas fa-unlock"></i> Unlock Admin Panel</button>
+      </div>
+    `;
+    return;
+  }
+
+  loadAdminShops();
+}
+
+async function unlockAdmin() {
+  const pass = $('adminPass')?.value;
+
+  try {
+    const doc = await db.collection("config").doc("admin").get();
+    if (!doc.exists) return toast("Admin config missing", "error");
+
+    const realPin = doc.data().adminPin;
+
+    if (pass === realPin) {
+      adminUnlocked = true;
+      toast("Admin panel unlocked", "success");
+      renderAdmin();
+    } else {
+      toast("Wrong admin password", "error");
+    }
+  } catch (e) {
+    toast("Error: " + e.message, "error");
+  }
+}
+
+async function loadAdminShops() {
+  const pc = $('pageContent');
+  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading all shops...</div>';
+  try {
+    const snap = await db.collection('shops').get();
+    const shops = [];
+    snap.forEach(d => shops.push({ uid: d.id, ...d.data() }));
+
+    pc.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-store"></i> All Shops (${shops.length})</h3>
+          <input type="text" id="adminSearch" placeholder="Search shops..." oninput="filterAdminTable()" style="padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);width:200px">
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th>Shop Name</th><th>Mobile</th><th>Status</th><th>Trial End</th><th>Sub End</th><th>Devices</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="adminTableBody">
+          ${shops.map(s => {
+            let status = 'Trial';
+            let statusBadge = 'badge-warning';
+            if (s.blocked) { status = 'Blocked'; statusBadge = 'badge-danger'; }
+            else if (s.subscriptionActive && daysLeft(s.subscriptionEndDate) >= 0) { status = 'Active'; statusBadge = 'badge-success'; }
+            else if (daysLeft(s.trialEndDate) >= 0) { status = 'Trial'; statusBadge = 'badge-warning'; }
+            else { status = 'Expired'; statusBadge = 'badge-danger'; }
+            return `
+              <tr class="admin-row" data-search="${(s.shopName + ' ' + s.ownerMobile).toLowerCase()}">
+                <td><strong>${s.shopName || '-'}</strong></td>
+                <td>${s.ownerMobile || '-'}</td>
+                <td><span class="badge ${statusBadge}">${status}</span></td>
+                <td>${s.trialEndDate || '-'}</td>
+                <td>${s.subscriptionEndDate || '-'}</td>
+                <td>${(s.devices || []).length}/${s.maxDevicesAllowed || 2}</td>
+                <td><button class="btn btn-info btn-xs" onclick="showAdminManage('${s.uid}','${encodeURIComponent(JSON.stringify(s))}')"><i class="fas fa-cog"></i> Manage</button></td>
+              </tr>
             `;
-            el('bill-rows-container').appendChild(d);
-        },
+          }).join('')}
+          </tbody></table>
+        </div>
+      </div>
+    `;
+  } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
+}
 
-        fill: (inp) => {
-            const item = (shop.stock || []).find(s => s.name.toLowerCase() === inp.value.toLowerCase());
-            if (item) {
-                const row = inp.parentElement.parentElement;
-                row.querySelector('.b-mrp').value = item.mrp;
-                row.querySelector('.b-price').value = item.sp;
-                row.dataset.cost = item.cp; 
-                billing.calc();
-            }
-        },
+function filterAdminTable() {
+  const q = ($('adminSearch')?.value || '').toLowerCase();
+  qsa('.admin-row').forEach(r => { r.style.display = r.dataset.search.includes(q) ? '' : 'none'; });
+}
 
-        calc: () => {
-            let sub = 0;
-            document.querySelectorAll('#bill-rows-container > div').forEach(r => {
-                const q = parseFloat(r.querySelector('.b-qty').value) || 0;
-                const p = parseFloat(r.querySelector('.b-price').value) || 0;
-                sub += (q * p);
-            });
+function showAdminManage(uid, dataStr) {
+  const s = JSON.parse(decodeURIComponent(dataStr));
+  const html = `
+    <div class="modal-overlay active" id="adminManageModal" onclick="if(event.target===this)this.remove()">
+      <div class="modal">
+        <div class="modal-header"><h3>Manage: ${s.shopName}</h3><button class="modal-close" onclick="$('adminManageModal').remove()"><i class="fas fa-times"></i></button></div>
+        <div class="grid-2 mb-20">
+          <div><strong>Mobile:</strong> ${s.ownerMobile}</div>
+          <div><strong>Blocked:</strong> ${s.blocked ? 'Yes' : 'No'}</div>
+          <div><strong>Trial End:</strong> ${s.trialEndDate || '-'}</div>
+          <div><strong>Sub End:</strong> ${s.subscriptionEndDate || '-'}</div>
+          <div><strong>Plan:</strong> ${s.planType || '-'}</div>
+          <div><strong>Devices:</strong> ${(s.devices || []).length}/${s.maxDevicesAllowed || 2}</div>
+        </div>
 
-            const dType = val('b-disc-type');
-            const dVal = num('b-disc-val');
-            const disc = dType === 'flat' ? dVal : (sub * dVal / 100);
-            
-            const tax = (sub - disc) * num('b-tax') / 100;
-            const final = Math.round(sub - disc + tax);
-            const paid = num('b-paid');
-            
-            el('b-total').innerText = money(final);
-            el('b-due').innerText = money(Math.max(0, final - paid));
+        <h4 class="mb-10">Subscription Management</h4>
+        <div class="grid-2 mb-10">
+          <button class="btn btn-success btn-sm" onclick="adminExtendPlan('${uid}',7)">+7 Days</button>
+          <button class="btn btn-success btn-sm" onclick="adminExtendPlan('${uid}',30)">+30 Days</button>
+          <button class="btn btn-success btn-sm" onclick="adminExtendPlan('${uid}',90)">+90 Days</button>
+          <button class="btn btn-success btn-sm" onclick="adminExtendPlan('${uid}',365)">+365 Days</button>
+        </div>
+        <div class="grid-2 mb-10">
+          <div class="form-group"><label>Set Plan Type</label>
+            <select id="adminPlanType"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="half-year">Half-Year</option><option value="yearly">Yearly</option></select>
+          </div>
+          <div class="form-group"><label>Max Devices</label><input type="number" id="adminMaxDev" value="${s.maxDevicesAllowed || 2}"></div>
+        </div>
+        <button class="btn btn-primary btn-sm w-full mb-10" onclick="adminSetPlan('${uid}')"><i class="fas fa-save"></i> Update Plan & Devices</button>
 
-            return { sub, disc, tax, final, paid, due: Math.max(0, final - paid) };
-        },
+        <div class="grid-2 mb-10">
+          <button class="btn ${s.blocked ? 'btn-success' : 'btn-danger'} btn-sm" onclick="adminToggleBlock('${uid}',${!s.blocked})">${s.blocked ? 'Unblock' : 'Block'} Shop</button>
+          <button class="btn btn-warning btn-sm" onclick="adminResetDevices('${uid}')"><i class="fas fa-mobile-screen"></i> Reset Devices</button>
+        </div>
 
-        save: () => {
-            if (Date.now() > shop.expiry) return alert("Plan Expired!");
-            if (val('b-cname') === '') return alert("Customer Name is Required");
-            
-            const c = billing.calc();
-            if (c.sub === 0) return alert("Cart is Empty");
-            
-            const items = [];
-            document.querySelectorAll('#bill-rows-container > div').forEach(r => {
-                const name = r.querySelector('.b-item').value;
-                const qty = parseFloat(r.querySelector('.b-qty').value) || 0;
-                if (name && qty > 0) {
-                    items.push({
-                        name, qty,
-                        mrp: parseFloat(r.querySelector('.b-mrp').value) || 0,
-                        price: parseFloat(r.querySelector('.b-price').value) || 0,
-                        cost: parseFloat(r.dataset.cost) || 0,
-                        total: qty * (parseFloat(r.querySelector('.b-price').value) || 0)
-                    });
-                    
-                    const s = (shop.stock || []).find(x => x.name === name);
-                    if (s) s.qty -= qty;
-                }
-            });
+        <h4 class="mb-10 mt-10">Extend Trial</h4>
+        <div class="grid-2">
+          <button class="btn btn-info btn-sm" onclick="adminExtendTrial('${uid}',7)">+7 Days Trial</button>
+          <button class="btn btn-info btn-sm" onclick="adminExtendTrial('${uid}',30)">+30 Days Trial</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
 
-            const inv = {
-                id: Date.now(),
-                date: new Date().toLocaleString(),
-                cName: val('b-cname'),
-                cMob: val('b-cmob'),
-                cAddr: val('b-caddr'),
-                items,
-                ...c
-            };
+async function adminExtendPlan(uid, days) {
+  try {
+    const ref = db.collection('shops').doc(uid);
+    const doc = await ref.get();
+    const data = doc.data();
+    let endDate = data.subscriptionEndDate || todayStr();
+    const end = new Date(endDate);
+    const now = new Date(); now.setHours(0, 0, 0, 0);
+    if (end < now) endDate = todayStr();
+    const newEnd = addDays(endDate, days);
+    await ref.update({
+      subscriptionActive: true,
+      subscriptionEndDate: newEnd,
+      subscriptionStartDate: data.subscriptionStartDate || todayStr(),
+      lastPaymentDate: todayStr(),
+      paymentStatus: 'paid'
+    });
+    toast(`Extended ${days} days. New end: ${newEnd}`, 'success');
+    $('adminManageModal')?.remove();
+    loadAdminShops();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
 
-            shop.invoices.push(inv);
-            app.save();
-            printer.print(inv);
-            
-            lastInvoice = inv;
-            el('btn-wa-share').classList.remove('hidden');
-            
-            el('bill-rows-container').innerHTML = ''; billing.addRow();
-            el('b-cname').value = ''; el('b-cmob').value = ''; el('b-caddr').value = ''; el('b-paid').value = '';
-            app.loadDash(); 
-        },
+async function adminSetPlan(uid) {
+  try {
+    const planType = $('adminPlanType').value;
+    const maxDevicesAllowed = Number($('adminMaxDev').value) || 2;
+    const prices = { monthly: 299, quarterly: 799, 'half-year': 1499, yearly: 2499 };
+    await db.collection('shops').doc(uid).update({ planType, planPrice: prices[planType] || 0, maxDevicesAllowed });
+    toast('Plan and devices updated', 'success');
+    $('adminManageModal')?.remove();
+    loadAdminShops();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
 
-        // --- IMAGE GENERATOR ---
-        genImage: () => {
-            if (!lastInvoice) return;
-            const i = lastInvoice;
-            const area = el('receipt-render-area');
-            
-            // Build Receipt HTML
-            const rows = i.items.map(item => `<tr><td>${item.name}</td><td>${item.qty}</td><td>${item.price}</td><td>${item.total}</td></tr>`).join('');
-            area.innerHTML = `
-                <div class="r-header">
-                    <h3>${shop.name}</h3>
-                    <p>${shop.addr} | ${shop.mob}</p>
-                    <p>${i.date}</p>
-                    <p>To: ${i.cName}</p>
-                </div>
-                <table class="r-table">
-                    <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Tot</th></tr></thead>
-                    <tbody>${rows}</tbody>
-                </table>
-                <div class="r-total">
-                    Total: ${money(i.final)}<br>
-                    Paid: ${money(i.paid)}<br>
-                    Due: ${money(i.due)}
-                </div>
-                <center style="margin-top:10px">Thank You!</center>
-            `;
+async function adminToggleBlock(uid, block) {
+  try {
+    await db.collection('shops').doc(uid).update({ blocked: block });
+    toast(block ? 'Shop blocked' : 'Shop unblocked', 'success');
+    $('adminManageModal')?.remove();
+    loadAdminShops();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
 
-            // Convert to Image using html2canvas
-            html2canvas(area, { scale: 2 }).then(canvas => {
-                canvas.toBlob(async (blob) => {
-                    const file = new File([blob], `Bill_${i.cName}.png`, { type: 'image/png' });
-                    
-                    // Try Web Share API (Mobile)
-                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({ files: [file], title: 'Invoice', text: `Invoice for ${i.cName}` });
-                        } catch (err) {
-                            billing.fallbackDownload(canvas, i);
-                        }
-                    } else {
-                        billing.fallbackDownload(canvas, i);
-                    }
-                });
-            });
-        },
+async function adminResetDevices(uid) {
+  try {
+    await db.collection('shops').doc(uid).update({ devices: [] });
+    toast('Devices reset', 'success');
+    $('adminManageModal')?.remove();
+    loadAdminShops();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
 
-        fallbackDownload: (canvas, i) => {
-            const link = document.createElement('a');
-            link.download = `Invoice_${i.cName}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-            setTimeout(() => {
-                const text = `*INVOICE: ${shop.name}*%0ATotal: ₹${i.final}%0ADue: ₹${i.due}`;
-                window.open(`https://wa.me/91${i.cMob}?text=${text}`, '_blank');
-            }, 1000);
-        }
-    };
+async function adminExtendTrial(uid, days) {
+  try {
+    const ref = db.collection('shops').doc(uid);
+    const doc = await ref.get();
+    const data = doc.data();
+    let endDate = data.trialEndDate || todayStr();
+    const newEnd = addDays(endDate, days);
+    await ref.update({ trialEndDate: newEnd, isTrialActive: true });
+    toast(`Trial extended ${days} days. New end: ${newEnd}`, 'success');
+    $('adminManageModal')?.remove();
+    loadAdminShops();
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
+}
 
-    /* ==========================================================================
-       MODULE 3: STOCK MANAGEMENT
-       ========================================================================== */
-    const stock = {
-        add: () => {
-            const name = val('s-name');
-            if (!name) return alert("Item Name Required");
-            
-            const ex = (shop.stock || []).find(s => s.name === name);
-            const item = {
-                name,
-                mrp: num('s-mrp'),
-                sp: num('s-sp'),
-                cp: num('s-cp'),
-                qty: num('s-qty')
-            };
+// ============================================================
+// LOGOUT
+// ============================================================
+function handleLogout() {
+  auth.signOut().then(() => {
+    currentUser = null;
+    shopData = null;
+    cart = [];
+    staffMode = false;
+    adminUnlocked = false;
+    toast('Logged out', 'info');
+    renderLogin();
+  });
+}
 
-            if (ex) {
-                ex.qty += item.qty; ex.sp = item.sp; ex.mrp = item.mrp; ex.cp = item.cp;
-            } else {
-                shop.stock.push(item);
-            }
-            app.save();
-            stock.render();
-            alert("Stock Updated");
-            el('s-name').value = ''; el('s-qty').value = '';
-        },
+// ============================================================
+// AUTH STATE LISTENER
+// ============================================================
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    try { await postLoginCheck(); } catch (e) { console.error(e); renderLogin(); }
+  } else {
+    renderLogin();
+  }
+});
 
-        render: () => {
-            const q = val('s-search').toLowerCase();
-            el('stock-list').innerHTML = (shop.stock || []).filter(s => s.name.toLowerCase().includes(q)).map((s, i) => `
-                <div class="list-item flex-row space-between">
-                    <div>
-                        <b style="font-size:16px">${s.name}</b><br>
-                        <small style="color:var(--secondary)">MRP:${s.mrp} | SP:${s.sp} | CP:${s.cp}</small>
-                    </div>
-                    <div class="text-right">
-                        <span style="background:${s.qty < 5 ? 'var(--danger)' : 'var(--success)'}; color:white; padding:2px 8px; border-radius:12px; font-size:12px">Qty: ${s.qty}</span><br>
-                        <button class="btn-sm btn-danger" style="margin-top:5px" onclick="shop.stock.splice(${i},1);app.save();stock.render()">Delete</button>
-                    </div>
-                </div>`).join('');
-        }
-    };
-
-    /* ==========================================================================
-       MODULE 4: HISTORY & KHATA
-       ========================================================================== */
-    const history = {
-        render: () => {
-            const q = val('h-search').toLowerCase();
-            el('history-list').innerHTML = [...(shop.invoices || [])].reverse().filter(i => i.cName.toLowerCase().includes(q)).map((i) => `
-                <div class="card" style="border-left: 5px solid ${i.due > 0 ? 'var(--warning)' : 'var(--success)'}">
-                    <div class="flex-row space-between">
-                        <b>${i.cName}</b>
-                        <b>${money(i.final)}</b>
-                    </div>
-                    <div class="flex-row space-between" style="font-size:11px; margin-top:5px; color:var(--secondary)">
-                        <span>ID: #${i.id}</span>
-                        <span style="color:${i.due > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:bold;">Due: ${money(i.due)}</span>
-                    </div>
-                    <div class="flex-row" style="margin-top:10px; justify-content:flex-end">
-                        <button class="btn-sm btn-whatsapp" onclick="billing.genHistImage('${i.id}')">WA</button>
-                        <button class="btn-sm btn-outline" onclick='printer.print(${JSON.stringify(i)})'>Print</button>
-                        ${i.due > 0 ? `<button class="btn-sm btn-success" onclick="history.settle(${i.id})">Pay Due</button>` : ''}
-                        <button class="btn-sm btn-danger" onclick="history.del(${i.id})">Del</button>
-                    </div>
-                </div>`).join('');
-        },
-
-        settle: (id) => {
-            const amt = parseFloat(prompt("Enter Amount Received:"));
-            if (!amt) return;
-            const i = shop.invoices.find(x => x.id === id);
-            if (amt > i.due) return alert("Error: Amount greater than due!");
-            i.paid += amt;
-            i.due -= amt;
-            app.save();
-            history.render();
-            app.loadDash();
-        },
-
-        del: (id) => {
-            if (isStaff) return alert("Access Denied: Owner Only");
-            if (confirm("Delete this Invoice Permanently?")) {
-                shop.invoices = shop.invoices.filter(x => x.id !== id);
-                app.save();
-                history.render();
-                app.loadDash();
-            }
-        }
-    };
-    // Helper to share from history list
-    billing.genHistImage = (id) => {
-        lastInvoice = shop.invoices.find(x => x.id === id);
-        if (lastInvoice) billing.genImage();
-    };
-
-    /* ==========================================================================
-       MODULE 5: SETTINGS & EXCEL
-       ========================================================================== */
-    const expense = {
-        add: () => {
-            const d = val('e-desc'), a = num('e-amt');
-            if (d && a) {
-                shop.expenses.push({ desc: d, amt: a });
-                app.save(); alert("Expense Added"); el('e-desc').value = ''; el('e-amt').value = ''; app.loadDash();
-            }
-        }
-    };
-
-    const settings = {
-        logo: () => {
-            const f = el('logo-upload').files[0];
-            const r = new FileReader();
-            r.onload = e => { shop.logo = e.target.result; el('logo-preview').src = shop.logo; app.save(); };
-            if (f) r.readAsDataURL(f);
-        },
-        printStyle: () => { shop.printStyle = val('set-print'); app.save(); },
-        backup: () => {
-            const a = document.createElement('a');
-            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(shop));
-            a.download = `Backup_${shop.name}.json`;
-            a.click();
-        },
-        restore: () => {
-            const f = el('restore-file').files[0];
-            const r = new FileReader();
-            r.onload = e => { shop = JSON.parse(e.target.result); app.save(); location.reload(); };
-            if (f) r.readAsText(f);
-        },
-        exportExcel: () => {
-            if(!shop.invoices.length) return alert("No Data to Export");
-            let csv = "Date,Invoice ID,Customer Name,Mobile,Total Amount,Paid,Due Balance\n";
-            shop.invoices.forEach(i => {
-                csv += `"${i.date}",${i.id},"${i.cName}",${i.cMob},${i.final},${i.paid},${i.due}\n`;
-            });
-            const link = document.createElement("a");
-            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
-            link.download = `Sales_Report_${shop.name}.csv`;
-            link.click();
-        }
-    };
-
-    /* ==========================================================================
-       MODULE 6: PRINT ENGINE
-       ========================================================================== */
-    const printer = {
-        print: (inv) => {
-            const logo = shop.logo ? `<img src="${shop.logo}">` : '';
-            const rows = inv.items.map(i => {
-                const mrp = i.mrp || i.price;
-                const save = (mrp - i.price) * i.qty;
-                return `<tr>
-                    <td>${i.name}</td>
-                    <td class="col-num">${mrp}</td>
-                    <td class="col-num">${i.price}</td>
-                    <td class="col-num">${i.qty}</td>
-                    <td class="col-num">${save > 0 ? money(save) : '-'}</td>
-                    <td class="col-num">${money(i.total)}</td>
-                </tr>`;
-            }).join('');
-            
-            let html = '';
-            if ((shop.printStyle || 'a4') === 'a4') {
-                html = `<div class="print-a4">
-                    <div class="header">${logo}<h1>${shop.name}</h1><p>${shop.addr} | Mob: ${shop.mob}</p></div>
-                    <div class="meta"><div><b>To:</b> ${inv.cName}<br>${inv.cAddr || ''}<br>${inv.cMob || ''}</div><div class="col-num"><b>Inv #:</b> ${inv.id}<br><b>Date:</b> ${inv.date}</div></div>
-                    <table><thead><tr><th>Item</th><th class="col-num">MRP</th><th class="col-num">Rate</th><th class="col-num">Qty</th><th class="col-num">Disc.</th><th class="col-num">Total</th></tr></thead><tbody>${rows}</tbody></table>
-                    <div class="totals"><p>Subtotal: ${money(inv.sub)}</p><p>Tax: ${money(inv.tax)}</p><p>Discount: -${money(inv.disc)}</p><div class="grand-total">Total: ${money(inv.final)}</div><p>Paid: ${money(inv.paid)} | Due: ${money(inv.due)}</p></div>
-                    <center style="margin-top:40px;font-size:12px">Thank You for Shopping!</center>
-                </div>`;
-            } else {
-                html = `<div class="print-thermal">
-                    <div class="header">${logo}<b>${shop.name}</b><br>${shop.mob}</div>
-                    <div style="border-bottom:1px dashed #000;margin-bottom:5px">To: ${inv.cName}</div>
-                    <table><thead><tr><th>Item</th><th class="col-num">Rt</th><th class="col-num">Q</th><th class="col-num">Tot</th></tr></thead><tbody>${inv.items.map(i => `<tr><td>${i.name}</td><td class="col-num">${i.price}</td><td class="col-num">${i.qty}</td><td class="col-num">${i.total}</td></tr>`).join('')}</tbody></table>
-                    <div class="totals">Net: <b>${money(inv.final)}</b><br>Due: ${money(inv.due)}</div><center style="margin-top:10px">Thank You</center>
-                </div>`;
-            }
-            el('print-area').innerHTML = html;
-            setTimeout(() => window.print(), 500);
-        }
-    };
-
-    /* ==========================================================================
-       MODULE 7: UI & ADMIN
-       ========================================================================== */
-    const ui = {
-        toggleAuth: (id) => {
-            ['login-box', 'reg-box', 'admin-box'].forEach(e => el(e).classList.add('hidden'));
-            el(id.includes('box') ? id : id + '-box').classList.remove('hidden');
-        },
-        tab: (id) => {
-            if (isStaff && ['stock', 'history', 'expense', 'settings'].includes(id)) return alert("Access Denied: Staff Mode Active");
-            ['dash', 'bill', 'stock', 'history', 'expense', 'settings'].forEach(t => {
-                el('tab-' + t).classList.add('hidden');
-                el('nav-' + t).classList.remove('active');
-            });
-            el('tab-' + id).classList.remove('hidden');
-            el('nav-' + id).classList.add('active');
-            if (id === 'stock') stock.render();
-            if (id === 'history') history.render();
-        },
-        applyMode: () => {
-            document.body.classList.toggle('staff-mode', isStaff);
-            el('lock-btn').innerText = isStaff ? "🔓 Unlock" : "🔒 Staff";
-            el('lock-btn').className = isStaff ? "btn-sm btn-success" : "btn-sm btn-warning";
-        }
-    };
-
-    const admin = {
-        login: () => {
-            if (val('a-pass') === "kusum231205") {
-                el('auth-view').classList.add('hidden');
-                el('admin-panel').classList.remove('hidden');
-                admin.render();
-            } else alert("Wrong Password");
-        },
-        render: () => {
-            el('admin-list').innerHTML = Object.keys(localStorage).filter(k => k.includes(DB_KEY)).map(k => {
-                const s = JSON.parse(localStorage.getItem(k));
-                const days = Math.ceil((s.expiry - Date.now()) / 86400000);
-                return `<div class="card">
-                    <div class="flex-row space-between"><b>${s.name}</b> <span>${s.mob}</span></div>
-                    <div style="font-size:11px; margin:5px 0; color:var(--secondary)">Pass: <b>${s.pass}</b> | PIN: <b>${s.pin}</b></div>
-                    <div class="flex-row space-between" style="background:#f8fafc; padding:5px; border-radius:5px">
-                        <span style="color:${days > 0 ? 'green' : 'red'}">Valid: ${days} Days</span>
-                    </div>
-                    <div class="grid-4" style="margin-top:5px;">
-                        <button class="btn-sm btn-primary" onclick="admin.ext('${k}',7)">+7D</button>
-                        <button class="btn-sm btn-success" onclick="admin.ext('${k}',90)">+3M</button>
-                        <button class="btn-sm btn-success" onclick="admin.ext('${k}',180)">+6M</button>
-                        <button class="btn-sm btn-success" onclick="admin.ext('${k}',365)">+1Y</button>
-                    </div>
-                    <button class="btn-sm btn-danger" style="width:100%; margin-top:5px;" onclick="admin.ext('${k}',-1)">Expire Now (Stop)</button>
-                </div>`;
-            }).join('');
-        },
-        ext: (k, d) => {
-            const s = JSON.parse(localStorage.getItem(k));
-            if (d === -1) s.expiry = 0;
-            else s.expiry = Math.max(Date.now(), s.expiry) + (d * 24 * 60 * 60 * 1000);
-            localStorage.setItem(k, JSON.stringify(s));
-            admin.render();
-            alert("Validity Updated Successfully!");
-        }
-    };
-
-    // START APP
-    app.init();
+// ============================================================
+// INITIAL RENDER
+// ============================================================
+renderLogin();
 </script>
 </body>
-</html>
+    </html>
