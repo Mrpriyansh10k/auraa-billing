@@ -419,8 +419,27 @@ async function postLoginCheck() {
     shopData = doc.data();
     shopData.uid = uid;
 
-    // Check blocked
-    if (shopData.blocked) { renderBlockedPage(); return; }
+    // If expired then show lock page first (even if blocked true)
+const today = new Date(); today.setHours(0,0,0,0);
+const trialEnd = shopData.trialEndDate ? new Date(shopData.trialEndDate) : null;
+const subEnd = shopData.subscriptionEndDate ? new Date(shopData.subscriptionEndDate) : null;
+if(trialEnd) trialEnd.setHours(0,0,0,0);
+if(subEnd) subEnd.setHours(0,0,0,0);
+
+let hasAccess = false;
+if (trialEnd && today <= trialEnd && !shopData.subscriptionActive) hasAccess = true;
+if (shopData.subscriptionActive && subEnd && today <= subEnd) hasAccess = true;
+
+if (!hasAccess) { 
+  renderLockPage(); 
+  return; 
+}
+
+// Block check only if access is valid
+if (shopData.blocked) { 
+  renderBlockedPage(); 
+  return; 
+}
 
     // Check device limit
     const deviceId = getDeviceId();
@@ -434,35 +453,25 @@ async function postLoginCheck() {
       await db.collection('shops').doc(uid).update({ devices });
       shopData.devices = devices;
     }
-
-    // Check subscription/trial status
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const trialEnd = shopData.trialEndDate ? new Date(shopData.trialEndDate) : null;
-    const subEnd = shopData.subscriptionEndDate ? new Date(shopData.subscriptionEndDate) : null;
-    if (trialEnd) trialEnd.setHours(0, 0, 0, 0);
-    if (subEnd) subEnd.setHours(0, 0, 0, 0);
-
-    let hasAccess = false;
-    // Step 2: Trial active
-    if (trialEnd && today <= trialEnd && !shopData.subscriptionActive) hasAccess = true;
-    // Step 3: Sub active
-    if (shopData.subscriptionActive && subEnd && today <= subEnd) hasAccess = true;
-
-    if (!hasAccess) { renderLockPage(); return; }
-
+    
     // Staff mode check
     staffMode = shopData.staffModeEnabled || false;
 
     currentPage = 'dashboard';
     renderApp();
 
-    // Show subscription popup if trial user or near expiry
-    const dl = daysLeft(shopData.subscriptionActive ? shopData.subscriptionEndDate : shopData.trialEndDate);
-    const shownToday = localStorage.getItem('auraa_sub_popup_' + todayStr());
-    if (!shownToday && ((!shopData.subscriptionActive) || dl <= 5)) {
-      setTimeout(() => showSubscriptionPopup(), 1500);
-      localStorage.setItem('auraa_sub_popup_' + todayStr(), '1');
-    }
+    // Subscription Popup Logic
+const dl = daysLeft(shopData.subscriptionActive ? shopData.subscriptionEndDate : shopData.trialEndDate);
+
+// Trial user = always show popup every login
+if (!shopData.subscriptionActive) {
+  setTimeout(() => showSubscriptionPopup(), 1500);
+}
+
+// Subscribed user but expiring within 3 days = show popup every login
+else if (dl <= 3) {
+  setTimeout(() => showSubscriptionPopup(), 1500);
+}
   } catch (e) {
     toast('Error: ' + e.message, 'error');
     console.error(e);
@@ -1805,4 +1814,4 @@ auth.onAuthStateChanged(async (user) => {
 renderLogin();
 </script>
 </body>
-    </html>
+  </html>
