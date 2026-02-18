@@ -237,6 +237,8 @@ body *{visibility:hidden}
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
 // ============================================================
@@ -826,6 +828,14 @@ async function renderBilling() {
     renderBillingUI();
   } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
 }
+let billingUITimer = null;
+
+function renderBillingUIDebounced() {
+  clearTimeout(billingUITimer);
+  billingUITimer = setTimeout(() => {
+    renderBillingUI();
+  }, 200);
+}
 
 function renderBillingUI() {
   const subtotal = cart.reduce((s, c) => s + (c.sp * c.cartQty), 0);
@@ -878,17 +888,17 @@ function renderBillingUI() {
         <div class="card" style="position:sticky;top:20px">
           <h3 class="mb-10"><i class="fas fa-calculator"></i> Bill Summary</h3>
           <div class="grid-2 mb-10">
-            <div class="form-group"><label>Discount ₹</label><input type="number" id="billDiscAmt" value="${discAmt}" oninput="renderBillingUI()"></div>
-            <div class="form-group"><label>Discount %</label><input type="number" id="billDiscPct" value="${discPct}" oninput="renderBillingUI()"></div>
+            <div class="form-group"><label>Discount ₹</label><input type="number" id="billDiscAmt" value="${discAmt}" oninput="renderBillingUIDebounced()"></div>
+            <div class="form-group"><label>Discount %</label><input type="number" id="billDiscPct" value="${discPct}" oninput="renderBillingUIDebounced()"></div>
           </div>
-          <div class="form-group"><label>GST %</label><input type="number" id="billGstPct" value="${gstPct}" oninput="renderBillingUI()"></div>
+          <div class="form-group"><label>GST %</label><input type="number" id="billGstPct" value="${gstPct}" oninput="renderBillingUIDebounced()"></div>
           <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
             <div class="summary-row"><span>Subtotal</span><span>${formatCurrency(subtotal)}</span></div>
             <div class="summary-row"><span>Discount</span><span class="text-danger">-${formatCurrency(discTotal)}</span></div>
             <div class="summary-row"><span>GST (${gstPct}%)</span><span>+${formatCurrency(gstAmt)}</span></div>
             <div class="summary-row total"><span>Grand Total</span><span>${formatCurrency(grandTotal)}</span></div>
           </div>
-          <div class="form-group mt-10"><label>Paid Amount (₹)</label><input type="number" id="billPaid" value="${paid}" oninput="renderBillingUI()"></div>
+          <div class="form-group mt-10"><label>Paid Amount (₹)</label><input type="number" id="billPaid" value="${paid}" oninput="renderBillingUIDebounced()"></div>
           <div class="summary-row"><span>Due Amount</span><span class="${due > 0 ? 'text-danger' : 'text-success'}" style="font-weight:700">${formatCurrency(due < 0 ? 0 : due)}</span></div>
           <button class="btn btn-success w-full mt-10" onclick="saveBill(${grandTotal},${paid},${due < 0 ? 0 : due},${discTotal},${gstAmt},${subtotal})"><i class="fas fa-save"></i> Save & Print Invoice</button>
           <button class="btn btn-outline w-full mt-10" onclick="cart=[];renderBillingUI()"><i class="fas fa-times"></i> Clear Cart</button>
@@ -896,18 +906,41 @@ function renderBillingUI() {
       </div>
     </div>
   `;
-  // Reattach click outside listener for search
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-dropdown')) { const sr = $('searchResults'); if (sr) sr.classList.remove('show'); }
-  });
 }
-
+// ✅ Click outside close dropdown (ONLY ONCE)
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".search-dropdown")) {
+    const sr = document.getElementById("searchResults");
+    if (sr) sr.classList.remove("show");
+  }
+});
 function searchItems() {
-  const q = ($('itemSearch')?.value || '').toLowerCase();
-  const results = billingStock.filter(s => s.name.toLowerCase().includes(q)).slice(0, 15);
+  const q = ($('itemSearch')?.value || '').trim().toLowerCase();
+  const results = billingStock.filter(s => (s.name || '').toLowerCase().includes(q)).slice(0, 15);
   const sr = $('searchResults');
   if (!sr) return;
-  if (results.length === 0 || !q) { sr.classList.remove('show'); sr.innerHTML = ''; return; }
+
+  if (!q) { 
+    sr.classList.remove('show'); 
+    sr.innerHTML = ''; 
+    return; 
+  }
+
+  if (results.length === 0) {
+    sr.classList.add('show');
+    sr.innerHTML = `
+      <div class="search-result-item" style="text-align:center;color:var(--text-muted)">
+        ❌ No item found
+      </div>
+      <div class="search-result-item" style="text-align:center">
+        <button class="btn btn-primary btn-sm w-full" onclick="showQuickAddItemModal(document.getElementById('itemSearch').value)">
+          <i class="fas fa-plus"></i> Add "${q}" to Stock & Bill
+        </button>
+      </div>
+    `;
+    return;
+  }
+
   sr.classList.add('show');
   sr.innerHTML = results.map(s => `
     <div class="search-result-item" onclick="addToCart('${s.id}')">
@@ -915,6 +948,102 @@ function searchItems() {
       <div class="item-stock">Stock: ${s.qty} | MRP: ${formatCurrency(s.mrp)}</div>
     </div>
   `).join('');
+}
+function showQuickAddItemModal(itemName) {
+
+  const old = document.getElementById("quickAddModal");
+  if (old) old.remove();
+
+  const html = `
+    <div class="modal-overlay active" id="quickAddModal" onclick="if(event.target===this)this.remove()">
+      <div class="modal" style="max-width:500px">
+        <div class="modal-header">
+          <h3><i class="fas fa-plus"></i> Quick Add Item</h3>
+          <button class="modal-close" onclick="document.getElementById('quickAddModal').remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label>Item Name *</label>
+          <input type="text" id="qaName" value="${itemName || ''}">
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>MRP (₹)</label>
+            <input type="number" id="qaMrp" value="0">
+          </div>
+          <div class="form-group">
+            <label>Selling Price (₹)</label>
+            <input type="number" id="qaSp" value="0">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Cost Price (₹)</label>
+            <input type="number" id="qaCp" value="0">
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="qaQty" value="1">
+          </div>
+        </div>
+
+        <button class="btn btn-success w-full" onclick="saveQuickItemAndAddToCart()">
+          <i class="fas fa-check"></i> Save & Add To Bill
+        </button>
+
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", html);
+}
+
+async function saveQuickItemAndAddToCart() {
+
+  const name = document.getElementById("qaName").value.trim();
+  const mrp = Number(document.getElementById("qaMrp").value) || 0;
+  const sp = Number(document.getElementById("qaSp").value) || 0;
+  const cp = Number(document.getElementById("qaCp").value) || 0;
+  const qty = Number(document.getElementById("qaQty").value) || 0;
+
+  if (!name) return toast("Enter item name", "error");
+  if (sp <= 0) return toast("Selling price must be greater than 0", "error");
+  if (qty <= 0) return toast("Quantity must be greater than 0", "error");
+
+  try {
+    const col = db.collection("shops").doc(currentUser.uid).collection("stock");
+
+    // Add stock item
+    const docRef = await col.add({ name, mrp, sp, cp, qty });
+
+    // Add to billingStock list immediately
+    const newItem = { id: docRef.id, name, mrp, sp, cp, qty };
+    billingStock.push(newItem);
+
+    // Add to cart immediately
+    cart.push({ ...newItem, cartQty: 1 });
+
+    toast("Item added & added to bill!", "success");
+
+    document.getElementById("quickAddModal").remove();
+
+    // Clear search
+    const is = document.getElementById("itemSearch");
+    if (is) is.value = "";
+
+    const sr = document.getElementById("searchResults");
+    if (sr) sr.classList.remove("show");
+
+    renderBillingUI();
+
+  } catch (e) {
+    toast("Error: " + e.message, "error");
+    console.error(e);
+  }
 }
 
 function addToCart(stockId) {
@@ -980,6 +1109,7 @@ async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal) {
 
     // Print
     printInvoice(invoice);
+    showInvoiceOptionsPopup(invoice);
 
     cart = [];
     renderBillingUI();
@@ -996,7 +1126,7 @@ function printInvoice(inv) {
 
   let html = '';
   if (isThermal) {
-    html = `<div class="thermal" style="text-align:center;font-family:monospace">
+    html = `<div class="thermal" id="invoiceBox" style="text-align:center;font-family:monospace">
       ${logo}
       <h3 style="margin:0">${shopData.shopName}</h3>
       <p style="font-size:10px;margin:2px 0">${shopData.shopAddress || ''}</p>
@@ -1018,7 +1148,7 @@ function printInvoice(inv) {
       <p style="font-size:9px">Support: ${WHATSAPP} | @${INSTAGRAM}</p>
     </div>`;
   } else {
-    html = `<div style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px">
+    html = `<div id="invoiceBox" style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px">
       <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #6c5ce7;padding-bottom:15px">
         <div>${logo}<h1 style="margin:0;font-size:24px;color:#6c5ce7">${shopData.shopName}</h1><p style="margin:2px 0;font-size:12px;color:#666">${shopData.shopAddress || ''}</p><p style="margin:2px 0;font-size:12px;color:#666">Ph: ${shopData.ownerMobile || ''}</p></div>
         <div style="text-align:right"><h2 style="margin:0;color:#6c5ce7">INVOICE</h2><p style="margin:3px 0"><strong>${inv.invoiceNumber}</strong></p><p style="margin:3px 0">Date: ${inv.date}</p></div>
@@ -1046,6 +1176,93 @@ function printInvoice(inv) {
   }
   $('printArea').innerHTML = html;
   setTimeout(() => { window.print(); }, 300);
+}
+function showInvoiceOptionsPopup(inv) {
+
+  const old = document.getElementById("invoiceOptionPopup");
+  if (old) old.remove();
+
+  const div = document.createElement("div");
+  div.id = "invoiceOptionPopup";
+  div.className = "modal-overlay active";
+
+  div.innerHTML = `
+    <div class="modal" style="max-width:450px">
+      <div class="modal-header">
+        <h3><i class="fas fa-file-invoice"></i> Invoice Options</h3>
+        <button class="modal-close" onclick="document.getElementById('invoiceOptionPopup').remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <button class="btn btn-primary w-full mb-10" onclick="window.print()">
+        <i class="fas fa-print"></i> Print Invoice
+      </button>
+
+      <button class="btn btn-info w-full mb-10" onclick="downloadInvoicePDF('${inv.invoiceNumber}')">
+        <i class="fas fa-file-pdf"></i> Download PDF
+      </button>
+
+      <button class="btn btn-warning w-full mb-10" onclick="downloadInvoiceImage('${inv.invoiceNumber}')">
+        <i class="fas fa-image"></i> Download Image
+      </button>
+
+      <button class="btn btn-success w-full mb-10" onclick="sendInvoiceWhatsAppPDF('${inv.invoiceNumber}')">
+        <i class="fab fa-whatsapp"></i> Send WhatsApp PDF
+      </button>
+
+      <button class="btn btn-success w-full" onclick="sendInvoiceWhatsAppImage('${inv.invoiceNumber}')">
+        <i class="fab fa-whatsapp"></i> Send WhatsApp Image
+      </button>
+
+      <div class="text-center mt-20 text-muted" style="font-size:12px">
+        PDF/Image download hone ke baad WhatsApp me manually attach karna hoga.
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(div);
+}
+
+async function downloadInvoicePDF(invoiceNumber) {
+  const el = document.getElementById("invoiceBox");
+  if (!el) return toast("Invoice not found", "error");
+
+  const opt = {
+    margin: 0.3,
+    filename: invoiceNumber + ".pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+  };
+
+  html2pdf().set(opt).from(el).save();
+  toast("PDF Download Started", "success");
+}
+
+async function downloadInvoiceImage(invoiceNumber) {
+  const el = document.getElementById("invoiceBox");
+  if (!el) return toast("Invoice not found", "error");
+
+  const canvas = await html2canvas(el, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const link = document.createElement("a");
+  link.href = imgData;
+  link.download = invoiceNumber + ".png";
+  link.click();
+
+  toast("Image Download Started", "success");
+}
+
+function sendInvoiceWhatsAppPDF(invoiceNumber) {
+  const msg = `Hi, Invoice ${invoiceNumber} generated. PDF downloaded. Please attach PDF manually.`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+function sendInvoiceWhatsAppImage(invoiceNumber) {
+  const msg = `Hi, Invoice ${invoiceNumber} generated. Image downloaded. Please attach image manually.`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
 // ============================================================
@@ -1814,4 +2031,4 @@ auth.onAuthStateChanged(async (user) => {
 renderLogin();
 </script>
 </body>
-  </html>
+</html>
