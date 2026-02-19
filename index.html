@@ -828,6 +828,35 @@ async function renderBilling() {
     renderBillingUI();
   } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
 }
+function updateBillSummaryOnly() {
+  const subtotal = cart.reduce((s, c) => s + (c.sp * c.cartQty), 0);
+
+  const discAmt = Number(document.getElementById("billDiscAmt")?.value) || 0;
+  const discPct = Number(document.getElementById("billDiscPct")?.value) || 0;
+  const gstPct  = Number(document.getElementById("billGstPct")?.value) || 0;
+
+  const discTotal = discAmt + (subtotal * discPct / 100);
+  const afterDisc = subtotal - discTotal;
+  const gstAmt = afterDisc * gstPct / 100;
+  const grandTotal = Math.round(afterDisc + gstAmt);
+
+  const paid = Number(document.getElementById("billPaid")?.value) || 0;
+  const due = grandTotal - paid;
+
+  document.getElementById("sumSubtotal").innerText = formatCurrency(subtotal);
+  document.getElementById("sumDiscount").innerText = "-"+formatCurrency(discTotal);
+  document.getElementById("sumGST").innerText = "+"+formatCurrency(gstAmt);
+  document.getElementById("sumGrand").innerText = formatCurrency(grandTotal);
+
+  document.getElementById("sumDue").innerText = formatCurrency(due < 0 ? 0 : due);
+  document.getElementById("sumDue").className = due > 0 ? "text-danger" : "text-success";
+
+  // Update save bill button
+  document.getElementById("saveBillBtn").setAttribute(
+    "onclick",
+    `saveBill(${grandTotal},${paid},${due < 0 ? 0 : due},${discTotal},${gstAmt},${subtotal})`
+  );
+}
 let billingUITimer = null;
 
 function renderBillingUIDebounced() {
@@ -888,25 +917,38 @@ function renderBillingUI() {
         <div class="card" style="position:sticky;top:20px">
           <h3 class="mb-10"><i class="fas fa-calculator"></i> Bill Summary</h3>
           <div class="grid-2 mb-10">
-            <div class="form-group"><label>Discount ₹</label><input type="number" id="billDiscAmt" value="${discAmt}" oninput="renderBillingUIDebounced()"></div>
-            <div class="form-group"><label>Discount %</label><input type="number" id="billDiscPct" value="${discPct}" oninput="renderBillingUIDebounced()"></div>
+            <div class="form-group"><label>Discount ₹</label><input type="number" id="billDiscAmt" value="${discAmt}" oninput="updateBillSummaryOnly()"></div>
+            <div class="form-group"><label>Discount %</label><input type="number" id="billDiscPct" value="${discPct}" oninput="updateBillSummaryOnly()"></div>
           </div>
-          <div class="form-group"><label>GST %</label><input type="number" id="billGstPct" value="${gstPct}" oninput="renderBillingUIDebounced()"></div>
+          <div class="form-group"><label>GST %</label><input type="number" id="billGstPct" value="${gstPct}" oninput="updateBillSummaryOnly()"></div>
           <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
-            <div class="summary-row"><span>Subtotal</span><span>${formatCurrency(subtotal)}</span></div>
-            <div class="summary-row"><span>Discount</span><span class="text-danger">-${formatCurrency(discTotal)}</span></div>
-            <div class="summary-row"><span>GST (${gstPct}%)</span><span>+${formatCurrency(gstAmt)}</span></div>
-            <div class="summary-row total"><span>Grand Total</span><span>${formatCurrency(grandTotal)}</span></div>
+            <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
+  <div class="summary-row"><span>Subtotal</span><span id="sumSubtotal">${formatCurrency(subtotal)}</span></div>
+  <div class="summary-row"><span>Discount</span><span class="text-danger" id="sumDiscount">-${formatCurrency(discTotal)}</span></div>
+  <div class="summary-row"><span>GST (${gstPct}%)</span><span id="sumGST">+${formatCurrency(gstAmt)}</span></div>
+  <div class="summary-row total"><span>Grand Total</span><span id="sumGrand">${formatCurrency(grandTotal)}</span></div>
+</div>
           </div>
-          <div class="form-group mt-10"><label>Paid Amount (₹)</label><input type="number" id="billPaid" value="${paid}" oninput="renderBillingUIDebounced()"></div>
-          <div class="summary-row"><span>Due Amount</span><span class="${due > 0 ? 'text-danger' : 'text-success'}" style="font-weight:700">${formatCurrency(due < 0 ? 0 : due)}</span></div>
-          <button class="btn btn-success w-full mt-10" onclick="saveBill(${grandTotal},${paid},${due < 0 ? 0 : due},${discTotal},${gstAmt},${subtotal})"><i class="fas fa-save"></i> Save & Print Invoice</button>
+          <div class="form-group mt-10"><label>Paid Amount (₹)</label><input type="number" id="billPaid" value="${paid}" oninput="updateBillSummaryOnly()"></div>
+          <div class="summary-row">
+  <span>Due Amount</span>
+  <span id="sumDue" class="${due > 0 ? 'text-danger' : 'text-success'}" style="font-weight:700">
+    ${formatCurrency(due < 0 ? 0 : due)}
+  </span>
+</div>
+         <button class="btn btn-success w-full mt-10" id="saveBillBtn" onclick="handleSaveBillClick()">
+  <i class="fas fa-save"></i> Save & Print Invoice
+</button>
+<i class="fas fa-save"></i> Save & Print Invoice
+</button>
           <button class="btn btn-outline w-full mt-10" onclick="cart=[];renderBillingUI()"><i class="fas fa-times"></i> Clear Cart</button>
         </div>
       </div>
     </div>
   `;
+  setTimeout(() => updateBillSummaryOnly(), 50);
 }
+
 // ✅ Click outside close dropdown (ONLY ONCE)
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".search-dropdown")) {
@@ -1207,13 +1249,15 @@ function showInvoiceOptionsPopup(inv) {
         <i class="fas fa-image"></i> Download Image
       </button>
 
-      <button class="btn btn-success w-full mb-10" onclick="sendInvoiceWhatsAppPDF('${inv.invoiceNumber}')">
-        <i class="fab fa-whatsapp"></i> Send WhatsApp PDF
-      </button>
+      <button class="btn btn-success w-full mb-10"
+onclick="shareInvoicePDFToCustomer('${inv.invoiceNumber}','${inv.customerMobile || ''}')">
+  <i class="fab fa-whatsapp"></i> Share PDF to Customer
+</button>
 
-      <button class="btn btn-success w-full" onclick="sendInvoiceWhatsAppImage('${inv.invoiceNumber}')">
-        <i class="fab fa-whatsapp"></i> Send WhatsApp Image
-      </button>
+<button class="btn btn-success w-full"
+onclick="shareInvoiceImageToCustomer('${inv.invoiceNumber}','${inv.customerMobile || ''}')">
+  <i class="fab fa-whatsapp"></i> Share Image to Customer
+</button>
 
       <div class="text-center mt-20 text-muted" style="font-size:12px">
         PDF/Image download hone ke baad WhatsApp me manually attach karna hoga.
@@ -1225,26 +1269,33 @@ function showInvoiceOptionsPopup(inv) {
 }
 
 async function downloadInvoicePDF(invoiceNumber) {
+
   const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
 
-  const opt = {
-    margin: 0.3,
-    filename: invoiceNumber + ".pdf",
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
-  };
+  try {
+    const opt = {
+      margin: 0.3,
+      filename: invoiceNumber + ".pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+    };
 
-  html2pdf().set(opt).from(el).save();
-  toast("PDF Download Started", "success");
+    await html2pdf().set(opt).from(el).save();
+
+    toast("PDF Download Successful!", "success");
+
+  } catch (e) {
+    toast("PDF Download Failed: " + e.message, "error");
+    console.error(e);
+  }
 }
-
 async function downloadInvoiceImage(invoiceNumber) {
   const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
 
-  const canvas = await html2canvas(el, { scale: 2 });
+  const canvas = await html2canvas(el, { scale: 1.5 });
   const imgData = canvas.toDataURL("image/png");
 
   const link = document.createElement("a");
@@ -1255,15 +1306,116 @@ async function downloadInvoiceImage(invoiceNumber) {
   toast("Image Download Started", "success");
 }
 
-function sendInvoiceWhatsAppPDF(invoiceNumber) {
-  const msg = `Hi, Invoice ${invoiceNumber} generated. PDF downloaded. Please attach PDF manually.`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+function openWhatsAppCustomer(invoiceNumber, customerMobile) {
+
+  customerMobile = (customerMobile || "").replace(/\D/g, "");
+
+  if (customerMobile.length !== 10) {
+    customerMobile = WHATSAPP; // fallback support number
+  }
+
+  const msg = `Hello 😊
+Your Invoice *${invoiceNumber}* is ready.
+
+Thanks for shopping at *${shopData.shopName}* 🙏
+AURAA BILLING PRO ${APP_VERSION}`;
+
+  window.open(`https://wa.me/91${customerMobile}?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
-function sendInvoiceWhatsAppImage(invoiceNumber) {
-  const msg = `Hi, Invoice ${invoiceNumber} generated. Image downloaded. Please attach image manually.`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+
+async function shareInvoiceImageToCustomer(invoiceNumber, customerMobile) {
+
+  const el = document.getElementById("invoiceBox");
+  if (!el) return toast("Invoice not found", "error");
+
+  try {
+    const canvas = await html2canvas(el, { scale: 2 });
+
+    const blob = await new Promise((resolve) => {
+      canvas.toBlob(resolve, "image/png");
+    });
+
+    if (!blob) return toast("Image generation failed", "error");
+
+    const file = new File([blob], invoiceNumber + ".png", { type: "image/png" });
+
+    // ✅ If browser supports direct share
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+      await navigator.share({
+        title: "Invoice " + invoiceNumber,
+        text: "Invoice Generated - " + invoiceNumber,
+        files: [file]
+      });
+
+      toast("Invoice Image Shared Successfully!", "success");
+
+      // ✅ After sharing, open WhatsApp message
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
+
+    } 
+    // ❌ If share not supported
+    else {
+      toast("Direct Share not supported. Opening WhatsApp...", "warning");
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
+    }
+
+  } catch (e) {
+    toast("Share failed: " + e.message, "error");
+    console.error(e);
+  }
 }
+
+
+async function shareInvoicePDFToCustomer(invoiceNumber, customerMobile) {
+
+  const el = document.getElementById("invoiceBox");
+  if (!el) return toast("Invoice not found", "error");
+
+  try {
+    const opt = {
+      margin: 0.3,
+      filename: invoiceNumber + ".pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+    };
+
+    const pdfBlob = await html2pdf().set(opt).from(el).outputPdf("blob");
+
+    if (!pdfBlob) return toast("PDF generation failed", "error");
+
+    const file = new File([pdfBlob], invoiceNumber + ".pdf", { type: "application/pdf" });
+
+    // ✅ If browser supports direct share
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+      await navigator.share({
+        title: "Invoice PDF " + invoiceNumber,
+        text: "Invoice PDF Generated - " + invoiceNumber,
+        files: [file]
+      });
+
+      toast("Invoice PDF Shared Successfully!", "success");
+
+      // ✅ After sharing open WhatsApp
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
+
+    } 
+    // ❌ If share not supported
+    else {
+      toast("Direct Share not supported. Opening WhatsApp...", "warning");
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
+    }
+
+  } catch (e) {
+    toast("PDF share failed: " + e.message, "error");
+    console.error(e);
+  }
+}
+
+
 
 // ============================================================
 // INVOICE HISTORY
@@ -2031,4 +2183,4 @@ auth.onAuthStateChanged(async (user) => {
 renderLogin();
 </script>
 </body>
-</html>
+  </html>
