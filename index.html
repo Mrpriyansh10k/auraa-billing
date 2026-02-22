@@ -220,6 +220,11 @@ body *{visibility:hidden}
 .sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99}
 .sidebar-overlay.active{display:block}
 .low-stock{color:var(--danger);font-weight:700}
+#invoiceBox{
+  opacity: 1 !important;
+  filter: none !important;
+  background: white !important;
+}
 </style>
 </head>
 <body>
@@ -272,6 +277,8 @@ let currentPage = 'dashboard';
 let cart = [];
 let staffMode = false;
 let sidebarOpen = false;
+
+let lastInvoiceData = null;
 
 // ============================================================
 // UTILITY FUNCTIONS
@@ -901,7 +908,7 @@ function renderBillingUI() {
           <h3 class="mb-10"><i class="fas fa-cart-shopping"></i> Cart (${cart.length} items)</h3>
           ${cart.length === 0 ? '<div class="empty-state"><i class="fas fa-cart-plus"></i><p>Cart is empty</p></div>' : cart.map((c, i) => `
             <div class="cart-item">
-              <div class="cart-item-info"><h4>${c.name}</h4><p>SP: ${formatCurrency(c.sp)} | Stock: ${c.qty}</p></div>
+              <div class="cart-item-info"><h4>${c.name}</h4><p>SP: ${formatCurrency(c.sp)} | Available: ${c.qty}</p></div>
               <div class="qty-controls">
                 <button onclick="updateCartQty(${i},-1)"><i class="fas fa-minus"></i></button>
                 <span>${c.cartQty}</span>
@@ -921,7 +928,6 @@ function renderBillingUI() {
             <div class="form-group"><label>Discount %</label><input type="number" id="billDiscPct" value="${discPct}" oninput="updateBillSummaryOnly()"></div>
           </div>
           <div class="form-group"><label>GST %</label><input type="number" id="billGstPct" value="${gstPct}" oninput="updateBillSummaryOnly()"></div>
-          <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
             <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
   <div class="summary-row"><span>Subtotal</span><span id="sumSubtotal">${formatCurrency(subtotal)}</span></div>
   <div class="summary-row"><span>Discount</span><span class="text-danger" id="sumDiscount">-${formatCurrency(discTotal)}</span></div>
@@ -937,8 +943,6 @@ function renderBillingUI() {
   </span>
 </div>
          <button class="btn btn-success w-full mt-10" id="saveBillBtn" onclick="handleSaveBillClick()">
-  <i class="fas fa-save"></i> Save & Print Invoice
-</button>
 <i class="fas fa-save"></i> Save & Print Invoice
 </button>
           <button class="btn btn-outline w-full mt-10" onclick="cart=[];renderBillingUI()"><i class="fas fa-times"></i> Clear Cart</button>
@@ -950,12 +954,16 @@ function renderBillingUI() {
 }
 
 // ✅ Click outside close dropdown (ONLY ONCE)
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".search-dropdown")) {
-    const sr = document.getElementById("searchResults");
-    if (sr) sr.classList.remove("show");
-  }
-});
+if (!window._auraaDropdownListenerAdded) {
+  window._auraaDropdownListenerAdded = true;
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-dropdown")) {
+      const sr = document.getElementById("searchResults");
+      if (sr) sr.classList.remove("show");
+    }
+  });
+}
 function searchItems() {
   const q = ($('itemSearch')?.value || '').trim().toLowerCase();
   const results = billingStock.filter(s => (s.name || '').toLowerCase().includes(q)).slice(0, 15);
@@ -976,7 +984,7 @@ function searchItems() {
       </div>
       <div class="search-result-item" style="text-align:center">
         <button class="btn btn-primary btn-sm w-full" onclick="showQuickAddItemModal(document.getElementById('itemSearch').value)">
-          <i class="fas fa-plus"></i> Add "${q}" to Stock & Bill
+          <i class="fas fa-plus"></i> Add "${document.getElementById('itemSearch').value}" to Stock & Bill
         </button>
       </div>
     `;
@@ -1112,6 +1120,25 @@ function updateCartQty(idx, delta) {
 }
 
 function removeFromCart(idx) { cart.splice(idx, 1); renderBillingUI(); }
+// ============================================================
+// HANDLE SAVE BILL CLICK
+// ============================================================
+function handleSaveBillClick() {
+  const subtotal = cart.reduce((s, c) => s + (c.sp * c.cartQty), 0);
+  const discAmt = Number(document.getElementById("billDiscAmt")?.value) || 0;
+  const discPct = Number(document.getElementById("billDiscPct")?.value) || 0;
+  const gstPct = Number(document.getElementById("billGstPct")?.value) || 0;
+
+  const discTotal = discAmt + (subtotal * discPct / 100);
+  const afterDisc = subtotal - discTotal;
+  const gstAmt = afterDisc * gstPct / 100;
+  const grandTotal = Math.round(afterDisc + gstAmt);
+
+  const paid = Number(document.getElementById("billPaid")?.value) || 0;
+  const due = grandTotal - paid < 0 ? 0 : grandTotal - paid;
+
+  saveBill(grandTotal, paid, due, discTotal, gstAmt, subtotal);
+}
 
 async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal) {
   if (cart.length === 0) return toast('Cart is empty', 'error');
@@ -1120,10 +1147,15 @@ async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal) {
     const shopRef = db.collection('shops').doc(uid);
 
     // Increment invoice counter
-    const shopDoc = await shopRef.get();
-    let counter = (shopDoc.data().invoiceCounter || 0) + 1;
-    await shopRef.update({ invoiceCounter: counter });
-    const invoiceNumber = 'INV-' + String(counter).padStart(5, '0');
+    let counter = 0;
+
+await db.runTransaction(async (t) => {
+  const shopSnap = await t.get(shopRef);
+  counter = (shopSnap.data().invoiceCounter || 0) + 1;
+  t.update(shopRef, { invoiceCounter: counter });
+});
+
+const invoiceNumber = "INV-" + String(counter).padStart(5, "0");
 
     const invoice = {
       invoiceNumber,
@@ -1136,6 +1168,8 @@ async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal) {
       subtotal, discount, gstAmt, grandTotal, paid, due,
       payments: paid > 0 ? [{ amount: paid, method: 'cash', date: todayStr() }] : []
     };
+    
+    lastInvoiceData = invoice;
 
     await shopRef.collection('invoices').add(invoice);
 
@@ -1161,64 +1195,189 @@ async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal) {
 // ============================================================
 // PRINT INVOICE
 // ============================================================
+// ============================================================
+// PRINT INVOICE
+// ============================================================
 function printInvoice(inv) {
-  const format = shopData.printFormat || 'a4';
-  const isThermal = format === 'thermal';
-  const logo = shopData.logoBase64 ? `<img src="${shopData.logoBase64}" style="max-height:60px;margin-bottom:5px">` : '';
 
-  let html = '';
+  const format = shopData.printFormat || "a4";
+  const isThermal = format === "thermal";
+
+  const logo = shopData.logoBase64
+    ? `<img src="${shopData.logoBase64}" style="max-height:60px;margin-bottom:5px">`
+    : "";
+
+  let html = "";
+
   if (isThermal) {
-    html = `<div class="thermal" id="invoiceBox" style="text-align:center;font-family:monospace">
-      ${logo}
-      <h3 style="margin:0">${shopData.shopName}</h3>
-      <p style="font-size:10px;margin:2px 0">${shopData.shopAddress || ''}</p>
-      <p style="font-size:10px;margin:2px 0">Ph: ${shopData.ownerMobile || ''}</p>
-      <hr style="border:none;border-top:1px dashed #000">
-      <p><strong>${inv.invoiceNumber}</strong> | ${inv.date}</p>
-      ${inv.customerName ? `<p>Customer: ${inv.customerName}</p>` : ''}
-      <hr style="border:none;border-top:1px dashed #000">
-      <table style="width:100%;font-size:11px"><thead><tr><th style="text-align:left">Item</th><th>Qty</th><th style="text-align:right">Amt</th></tr></thead><tbody>
-      ${inv.items.map(it => `<tr><td style="text-align:left">${it.name}</td><td style="text-align:center">${it.qty}</td><td style="text-align:right">${it.total}</td></tr>`).join('')}
-      </tbody></table>
-      <hr style="border:none;border-top:1px dashed #000">
-      <p>Subtotal: ₹${inv.subtotal} | Disc: ₹${inv.discount}</p>
-      <p>GST: ₹${inv.gstAmt}</p>
-      <p style="font-size:14px"><strong>Total: ₹${inv.grandTotal}</strong></p>
-      <p>Paid: ₹${inv.paid} | Due: ₹${inv.due}</p>
-      <hr style="border:none;border-top:1px dashed #000">
-      <p style="font-size:9px">Powered by AURAA BILLING PRO ${APP_VERSION}</p>
-      <p style="font-size:9px">Support: ${WHATSAPP} | @${INSTAGRAM}</p>
-    </div>`;
+
+    html = `
+      <div class="thermal" id="invoiceBox"
+        style="opacity:1 !important; filter:none !important; background:white !important;
+        color:black !important; text-align:center; font-family:monospace; padding:15px;">
+
+        ${logo}
+
+        <h3 style="margin:0; color:black;">${shopData.shopName}</h3>
+        <p style="font-size:10px; margin:2px 0; color:black;">${shopData.shopAddress || ""}</p>
+        <p style="font-size:10px; margin:2px 0; color:black;">Ph: ${shopData.ownerMobile || ""}</p>
+
+        <hr style="margin:8px 0;border:none;border-top:1px dashed #333">
+
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:left;">
+          Invoice: <b>${inv.invoiceNumber}</b>
+        </p>
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:left;">
+          Date: ${inv.date}
+        </p>
+
+        <hr style="margin:8px 0;border:none;border-top:1px dashed #333">
+
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:left;">
+          Customer: <b>${inv.customerName || "Walk-in"}</b>
+        </p>
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:left;">
+          Mobile: ${inv.customerMobile || "-"}
+        </p>
+
+        <hr style="margin:8px 0;border:none;border-top:1px dashed #333">
+
+        <table style="width:100%;font-size:10px;color:black;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px dashed #333">
+              <th style="text-align:left;padding:4px">Item</th>
+              <th style="text-align:right;padding:4px">Qty</th>
+              <th style="text-align:right;padding:4px">Rate</th>
+              <th style="text-align:right;padding:4px">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${inv.items.map(it => `
+              <tr style="border-bottom:1px dashed #ccc">
+                <td style="text-align:left;padding:4px">${it.name}</td>
+                <td style="text-align:right;padding:4px">${it.qty}</td>
+                <td style="text-align:right;padding:4px">${formatCurrency(it.sp)}</td>
+                <td style="text-align:right;padding:4px">${formatCurrency(it.total)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+
+        <hr style="margin:8px 0;border:none;border-top:1px dashed #333">
+
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:right;">
+          Subtotal: ${formatCurrency(inv.subtotal)}
+        </p>
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:right;">
+          Discount: -${formatCurrency(inv.discount)}
+        </p>
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:right;">
+          GST: +${formatCurrency(inv.gstAmt)}
+        </p>
+
+        <hr style="margin:8px 0;border:none;border-top:1px dashed #333">
+
+        <h3 style="margin:5px 0;color:black;text-align:right;">
+          Total: ${formatCurrency(inv.grandTotal)}
+        </h3>
+
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:right;">
+          Paid: ${formatCurrency(inv.paid)}
+        </p>
+        <p style="font-size:10px;margin:2px 0;color:black;text-align:right;">
+          Due: ${formatCurrency(inv.due)}
+        </p>
+
+        <hr style="margin:8px 0;border:none;border-top:1px dashed #333">
+
+        <p style="font-size:10px;margin-top:10px;color:black;">
+          Thank you for shopping!
+        </p>
+
+        <p style="font-size:9px;margin-top:5px;color:gray;">
+          Powered by AURAA BILLING PRO ${APP_VERSION}
+        </p>
+      </div>
+    `;
+
   } else {
-    html = `<div id="invoiceBox" style="font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px">
-      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #6c5ce7;padding-bottom:15px">
-        <div>${logo}<h1 style="margin:0;font-size:24px;color:#6c5ce7">${shopData.shopName}</h1><p style="margin:2px 0;font-size:12px;color:#666">${shopData.shopAddress || ''}</p><p style="margin:2px 0;font-size:12px;color:#666">Ph: ${shopData.ownerMobile || ''}</p></div>
-        <div style="text-align:right"><h2 style="margin:0;color:#6c5ce7">INVOICE</h2><p style="margin:3px 0"><strong>${inv.invoiceNumber}</strong></p><p style="margin:3px 0">Date: ${inv.date}</p></div>
+
+    html = `
+      <div id="invoiceBox"
+        style="background:white; color:black; padding:20px; font-family:Arial;
+        max-width:800px; margin:auto; border:1px solid #ddd; border-radius:10px;">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            ${logo}
+            <h2 style="margin:0;color:#6c5ce7">${shopData.shopName}</h2>
+            <p style="margin:2px 0;color:#555">${shopData.shopAddress || ""}</p>
+            <p style="margin:2px 0;color:#555">Ph: ${shopData.ownerMobile || ""}</p>
+          </div>
+          <div style="text-align:right">
+            <h1 style="margin:0;color:#6c5ce7">INVOICE</h1>
+            <p style="margin:2px 0;color:#555">${inv.invoiceNumber}</p>
+            <p style="margin:2px 0;color:#555">Date: ${inv.date}</p>
+          </div>
+        </div>
+
+        <hr style="margin:15px 0">
+
+        <div style="background:#f4f4f4;padding:10px;border-radius:8px;">
+          <b>Bill To:</b><br>
+          ${inv.customerName || "Walk-in"}<br>
+          Ph: ${inv.customerMobile || "-"}<br>
+          ${inv.customerAddress || ""}
+        </div>
+
+        <table style="width:100%;border-collapse:collapse;margin-top:15px;">
+          <thead>
+            <tr style="background:#111827;color:white;">
+              <th style="padding:10px;text-align:left;">#</th>
+              <th style="padding:10px;text-align:left;">Item</th>
+              <th style="padding:10px;text-align:right;">MRP</th>
+              <th style="padding:10px;text-align:right;">SP</th>
+              <th style="padding:10px;text-align:right;">Qty</th>
+              <th style="padding:10px;text-align:right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${inv.items.map((it, i) => `
+              <tr style="border-bottom:1px solid #ddd;">
+                <td style="padding:10px;">${i + 1}</td>
+                <td style="padding:10px;">${it.name}</td>
+                <td style="padding:10px;text-align:right;">${formatCurrency(it.mrp)}</td>
+                <td style="padding:10px;text-align:right;">${formatCurrency(it.sp)}</td>
+                <td style="padding:10px;text-align:right;">${it.qty}</td>
+                <td style="padding:10px;text-align:right;">${formatCurrency(it.total)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+
+        <div style="margin-top:15px;text-align:right;">
+          <p>Subtotal: ${formatCurrency(inv.subtotal)}</p>
+          <p style="color:red;">Discount: -${formatCurrency(inv.discount)}</p>
+          <p>GST: +${formatCurrency(inv.gstAmt)}</p>
+          <hr>
+          <h2 style="color:#6c5ce7;">Grand Total: ${formatCurrency(inv.grandTotal)}</h2>
+          <p style="color:green;">Paid: ${formatCurrency(inv.paid)}</p>
+          <p style="color:red;">Due: ${formatCurrency(inv.due)}</p>
+        </div>
+
+        <hr style="margin:20px 0">
+
+        <p style="text-align:center;color:#777;font-size:12px;">
+          Thank you for your business!<br>
+          Powered by AURAA BILLING PRO ${APP_VERSION} | Support: ${WHATSAPP} | @${INSTAGRAM}
+        </p>
       </div>
-      <div style="margin:15px 0;padding:10px;background:#f8f8f8;border-radius:8px">
-        <strong>Bill To:</strong><br>${inv.customerName || 'Walk-in Customer'}${inv.customerMobile ? '<br>Ph: ' + inv.customerMobile : ''}${inv.customerAddress ? '<br>' + inv.customerAddress : ''}
-      </div>
-      <table style="width:100%;border-collapse:collapse;margin:15px 0">
-        <thead><tr style="background:#6c5ce7;color:#fff"><th style="padding:10px;text-align:left">#</th><th style="padding:10px;text-align:left">Item</th><th style="padding:10px;text-align:right">MRP</th><th style="padding:10px;text-align:right">SP</th><th style="padding:10px;text-align:center">Qty</th><th style="padding:10px;text-align:right">Total</th></tr></thead>
-        <tbody>${inv.items.map((it, i) => `<tr style="border-bottom:1px solid #eee"><td style="padding:8px">${i + 1}</td><td style="padding:8px">${it.name}</td><td style="padding:8px;text-align:right">₹${it.mrp}</td><td style="padding:8px;text-align:right">₹${it.sp}</td><td style="padding:8px;text-align:center">${it.qty}</td><td style="padding:8px;text-align:right">₹${it.total}</td></tr>`).join('')}</tbody>
-      </table>
-      <div style="display:flex;justify-content:flex-end"><div style="width:300px">
-        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>Subtotal:</span><span>₹${inv.subtotal}</span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0;color:#e74c6c"><span>Discount:</span><span>-₹${inv.discount}</span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>GST:</span><span>+₹${inv.gstAmt}</span></div>
-        <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:18px;font-weight:700;border-top:2px solid #6c5ce7;color:#6c5ce7"><span>Grand Total:</span><span>₹${inv.grandTotal}</span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>Paid:</span><span style="color:green">₹${inv.paid}</span></div>
-        <div style="display:flex;justify-content:space-between;padding:5px 0"><span>Due:</span><span style="color:${inv.due > 0 ? 'red' : 'green'}">₹${inv.due}</span></div>
-      </div></div>
-      <div style="text-align:center;margin-top:30px;padding-top:15px;border-top:1px solid #ddd;font-size:11px;color:#999">
-        <p>Thank you for your business!</p>
-        <p>Powered by AURAA BILLING PRO ${APP_VERSION} | Support: ${WHATSAPP} | @${INSTAGRAM}</p>
-      </div>
-    </div>`;
+    `;
   }
-  $('printArea').innerHTML = html;
-  setTimeout(() => { window.print(); }, 300);
+
+  document.getElementById("printArea").innerHTML = html;
 }
+      
 function showInvoiceOptionsPopup(inv) {
 
   const old = document.getElementById("invoiceOptionPopup");
@@ -1260,7 +1419,7 @@ onclick="shareInvoiceImageToCustomer('${inv.invoiceNumber}','${inv.customerMobil
 </button>
 
       <div class="text-center mt-20 text-muted" style="font-size:12px">
-        PDF/Image download hone ke baad WhatsApp me manually attach karna hoga.
+        If direct share not supported, download file & attach manually in WhatsApp.
       </div>
     </div>
   `;
@@ -1270,15 +1429,30 @@ onclick="shareInvoiceImageToCustomer('${inv.invoiceNumber}','${inv.customerMobil
 
 async function downloadInvoicePDF(invoiceNumber) {
 
-  const el = document.getElementById("invoiceBox");
+  if (!lastInvoiceData) {
+    return toast("Invoice data missing! Please open invoice again.", "error");
+  }
+
+  // ✅ always correct invoice number
+  invoiceNumber = lastInvoiceData.invoiceNumber || invoiceNumber;
+
+  printInvoice(lastInvoiceData);
+  await new Promise(r => setTimeout(r, 200));
+
+const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
 
+  const printArea = document.getElementById("printArea");
+  const oldDisplay = printArea.style.display;
+
   try {
+    printArea.style.display = "block";
+
     const opt = {
       margin: 0.3,
       filename: invoiceNumber + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true },
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
     };
 
@@ -1287,23 +1461,57 @@ async function downloadInvoicePDF(invoiceNumber) {
     toast("PDF Download Successful!", "success");
 
   } catch (e) {
-    toast("PDF Download Failed: " + e.message, "error");
+    toast("PDF Failed: " + e.message, "error");
     console.error(e);
+
+  } finally {
+    printArea.style.display = oldDisplay;
   }
 }
+
 async function downloadInvoiceImage(invoiceNumber) {
+
+  if (!lastInvoiceData) {
+    return toast("Invoice data missing!", "error");
+  }
+
+  // ✅ always correct invoice number
+  invoiceNumber = lastInvoiceData.invoiceNumber || invoiceNumber;
+
+  printInvoice(lastInvoiceData);
+  await new Promise(r => setTimeout(r, 200));
+
   const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
 
-  const canvas = await html2canvas(el, { scale: 1.5 });
-  const imgData = canvas.toDataURL("image/png");
+  const printArea = document.getElementById("printArea");
+  const oldDisplay = printArea.style.display;
 
-  const link = document.createElement("a");
-  link.href = imgData;
-  link.download = invoiceNumber + ".png";
-  link.click();
+  try {
+    printArea.style.display = "block";
 
-  toast("Image Download Started", "success");
+    const canvas = await html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: "#ffffff"
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.href = imgData;
+    link.download = invoiceNumber + ".png";
+    link.click();
+
+    toast("Image Download Successful!", "success");
+
+  } catch (e) {
+    toast("Image Download Failed: " + e.message, "error");
+    console.error(e);
+
+  } finally {
+    printArea.style.display = oldDisplay;
+  }
 }
 
 function openWhatsAppCustomer(invoiceNumber, customerMobile) {
@@ -1325,6 +1533,12 @@ AURAA BILLING PRO ${APP_VERSION}`;
 
 
 async function shareInvoiceImageToCustomer(invoiceNumber, customerMobile) {
+  
+  customerMobile = (customerMobile || "").replace(/\D/g, "");
+
+  if (customerMobile.length !== 10) {
+    return toast("Customer mobile number invalid!", "error");
+  }
 
   const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
@@ -1369,6 +1583,12 @@ async function shareInvoiceImageToCustomer(invoiceNumber, customerMobile) {
 
 
 async function shareInvoicePDFToCustomer(invoiceNumber, customerMobile) {
+  
+  customerMobile = (customerMobile || "").replace(/\D/g, "");
+
+  if (customerMobile.length !== 10) {
+    return toast("Customer mobile number invalid!", "error");
+  }
 
   const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
@@ -1481,6 +1701,7 @@ async function viewInvoice(id) {
     const doc = await db.collection('shops').doc(currentUser.uid).collection('invoices').doc(id).get();
     if (!doc.exists) return toast('Invoice not found', 'error');
     const inv = doc.data();
+    lastInvoiceData = inv;
     const html = `
       <div class="modal-overlay active" id="viewInvModal" onclick="if(event.target===this)this.remove()">
         <div class="modal modal-lg">
@@ -1521,8 +1742,18 @@ async function reprintInvoice(id) {
   try {
     const doc = await db.collection('shops').doc(currentUser.uid).collection('invoices').doc(id).get();
     if (!doc.exists) return toast('Invoice not found', 'error');
-    printInvoice(doc.data());
-  } catch (e) { toast('Error: ' + e.message, 'error'); }
+
+    const inv = doc.data();
+
+    // ✅ important fix
+    lastInvoiceData = inv;
+
+    printInvoice(inv);
+    showInvoiceOptionsPopup(inv);
+
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
 }
 
 async function deleteInvoice(id) {
@@ -1531,7 +1762,9 @@ async function deleteInvoice(id) {
     const uid = currentUser.uid;
     const doc = await db.collection('shops').doc(uid).collection('invoices').doc(id).get();
     if (!doc.exists) return toast('Not found', 'error');
+    
     const inv = doc.data();
+lastInvoiceData = inv;
 
     // Restore stock
     const batch = db.batch();
@@ -1916,7 +2149,7 @@ async function restoreBackup() {
     // Restore stock
     for (const item of (data.stock || [])) {
       const { id, ...rest } = item;
-      await db.collection('shops').doc(uid).collection('stock').add(rest);
+      await db.collection('shops').doc(uid).collection('stock').doc(id).set(rest);
     }
 
     // Restore invoices
