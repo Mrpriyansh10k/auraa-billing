@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AURAA BILLING PRO V20 - Premium Billing Software</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 /* ====== CSS RESET & ROOT VARIABLES ====== */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -294,7 +295,81 @@ function toast(msg, type = 'info') {
   const icons = { success: 'check-circle', error: 'times-circle', warning: 'exclamation-triangle', info: 'info-circle' };
   t.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i><span>${msg}</span>`;
   container.appendChild(t);
+  
   setTimeout(() => { t.style.animation = 'slideOut .3s ease forwards'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+let chartType = 'monthly';
+let salesChart = null;
+let profitData = [];
+
+function changeChart(type) {
+  chartType = type;
+  renderChart();
+}
+
+function renderChart() {
+  const canvas = document.getElementById('salesChart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let labels = [];
+  let data = [];
+
+  if (chartType === 'daily') {
+    labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    data = [1200,1900,800,1500,2000,1700,900];
+  }
+
+  else if (chartType === 'weekly') {
+    labels = ['Week 1','Week 2','Week 3','Week 4'];
+    data = [5000,7000,4000,9000];
+  }
+
+  else if (chartType === 'monthly') {
+    labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    data = window.monthlyData || [];
+  }
+
+  else if (chartType === 'profit') {
+    labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    data = profitData || [];
+  }
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+  gradient.addColorStop(0, "rgba(108,92,231,0.6)");
+  gradient.addColorStop(1, "rgba(108,92,231,0)");
+
+  if (salesChart) {
+    salesChart.destroy();
+  }
+
+  salesChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: chartType.toUpperCase(),
+        data,
+        tension: 0.4,
+        fill: true,
+        backgroundColor: gradient,
+        borderColor: "#6c5ce7"
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: { color: "#fff" }
+        }
+      },
+      scales: {
+        x: { ticks: { color: "#aaa" } },
+        y: { ticks: { color: "#aaa" } }
+      }
+    }
+  });
 }
 
 function formatCurrency(n) { return '₹' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
@@ -665,11 +740,61 @@ function renderPage(page) {
 // DASHBOARD
 // ============================================================
 async function renderDashboard() {
+  
+  profitData = Array(12).fill(0);
+  
   const pc = $('pageContent');
   pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading dashboard...</div>';
   try {
     const uid = currentUser.uid;
     const today = todayStr();
+    
+    // ================= MONTHLY DATA =================
+const now = new Date();
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
+
+let monthlySales = 0;
+let monthlyPaid = 0;
+let monthlyDue = 0;
+let monthlyProfit = 0;
+
+const allInvoicesSnap = await db.collection('shops')
+  .doc(uid)
+  .collection('invoices')
+  .get();
+
+let monthlyData = Array(12).fill(0);
+
+allInvoicesSnap.forEach(d => {
+  const data = d.data();
+
+const invDate = new Date(data.date + "T00:00:00");
+const month = invDate.getMonth();
+
+profitData[month] = (profitData[month] || 0) + (data.profit || 0);
+
+  // 📊 Graph data
+  monthlyData[month] += Number(data.grandTotal || 0);
+
+  // ✅ Monthly calculation
+  if (
+    invDate.getMonth() === currentMonth &&
+    invDate.getFullYear() === currentYear
+  ) {
+    monthlySales += Number(data.grandTotal || 0);
+    monthlyPaid += Number(data.paid || 0);
+    monthlyDue += Number(data.due || 0);
+    monthlyProfit += Number(data.profit || 0);
+  }
+});
+
+window.monthlyData = monthlyData;
+
+setTimeout(() => {
+  renderChart();
+}, 200);
+
 
     // Today invoices
     const invSnap = await db.collection('shops').doc(uid).collection('invoices').where('date', '==', today).get();
@@ -693,6 +818,67 @@ async function renderDashboard() {
     let todayExp = 0;
     expSnap.forEach(d => { todayExp += Number(d.data().amount || 0); });
 
+// ================= TOP CUSTOMERS =================
+let customerMap = {};
+
+allInvoicesSnap.forEach(d => {
+  const data = d.data();
+  const name = data.customerName || "Walk-in";
+
+  if (!customerMap[name]) {
+    customerMap[name] = {
+      name: name,
+      total: 0,
+      visits: 0
+    };
+  }
+
+  customerMap[name].total += Number(data.grandTotal || 0);
+  customerMap[name].visits += 1;
+  
+  if (customerMap[name].total > 5000) {
+  customerMap[name].vip = true;
+}
+  
+});
+
+let topCustomers = Object.values(customerMap)
+  .sort((a, b) => b.total - a.total)
+  .slice(0, 10);
+  
+  // ================= TOP SELLING ITEMS =================
+let itemMap = {};
+
+allInvoicesSnap.forEach(d => {
+  const data = d.data();
+
+  (data.items || []).forEach(item => {
+    const name = item.name || "Unknown";
+
+    if (!itemMap[name]) {
+      itemMap[name] = {
+        name: name,
+        qty: 0,
+        total: 0
+      };
+    }
+    
+
+    itemMap[name].qty += Number(item.qty || 0);
+    itemMap[name].total += Number(item.total || 0);
+  });
+});
+
+let topItems = Object.values(itemMap)
+  .sort((a, b) => b.qty - a.qty)
+  .slice(0, 5);
+  
+  const best = Math.max(...monthlyData);
+const low = Math.min(...monthlyData);
+const avg = Math.round(
+  monthlyData.reduce((a,b)=>a+b,0)/monthlyData.length
+);
+  
     pc.innerHTML = `
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-icon icon-sales"><i class="fas fa-indian-rupee-sign"></i></div><div class="stat-value">${formatCurrency(todaySales)}</div><div class="stat-label">Today Sales</div></div>
@@ -701,6 +887,23 @@ async function renderDashboard() {
         <div class="stat-card"><div class="stat-icon icon-low"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-value">${lowStock}</div><div class="stat-label">Low Stock Items</div></div>
         <div class="stat-card"><div class="stat-icon icon-due"><i class="fas fa-hand-holding-dollar"></i></div><div class="stat-value">${formatCurrency(totalDue)}</div><div class="stat-label">Total Due Amount</div></div>
         <div class="stat-card"><div class="stat-icon icon-expense"><i class="fas fa-receipt"></i></div><div class="stat-value">${formatCurrency(todayExp)}</div><div class="stat-label">Today Expenses</div></div>
+        <div class="stat-card">
+  <div class="stat-icon icon-sales"><i class="fas fa-calendar"></i></div>
+  <div class="stat-value">${formatCurrency(monthlySales)}</div>
+  <div class="stat-label">Monthly Sales</div>
+</div>
+
+<div class="stat-card">
+  <div class="stat-icon icon-sales"><i class="fas fa-wallet"></i></div>
+  <div class="stat-value">${formatCurrency(monthlyPaid)}</div>
+  <div class="stat-label">Received Payment</div>
+</div>
+
+<div class="stat-card">
+  <div class="stat-icon icon-due"><i class="fas fa-hourglass-half"></i></div>
+  <div class="stat-value">${formatCurrency(monthlyDue)}</div>
+  <div class="stat-label">Monthly Due</div>
+</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
         <div class="card">
@@ -717,8 +920,116 @@ async function renderDashboard() {
             ${lowStockItems.slice(0, 10).map(s => `<tr><td>${s.name}</td><td class="low-stock">${s.qty}</td></tr>`).join('')}
             </tbody></table></div>`}
         </div>
+        <div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-crown"></i> Top 10 Customers</h3>
+  </div>
+
+  ${
+    topCustomers.length === 0
+      ? `<div class="empty-state">No customers yet</div>`
+      : `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Total Spend</th>
+            <th>Visits</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${topCustomers.map((c, i) => `
+  <tr style="${i === 0 ? 'background: rgba(108,92,231,0.15); font-weight:700;' : ''}">
+    <td>
+      ${i === 0 ? '👑 ' : ''}${c.name}
+    </td>
+    <td>${formatCurrency(c.total)}</td>
+    <td>
+      ${c.visits}
+${c.vip ? '<span style="margin-left:5px;color:#00ff9d;font-size:12px">👑 VIP</span>' : ''}
+    </td>
+  </tr>
+`).join('')}
+        </tbody>
+      </table>
+    </div>`
+  }
+</div>
+
+   <div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-box"></i> Top Selling Items</h3>
+  </div>
+
+  ${
+    topItems.length === 0
+      ? `<div class="empty-state">No items yet</div>`
+      : `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty Sold</th>
+                <th>Total Sales</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${topItems.map((item, i) => {
+  const maxQty = topItems[0]?.qty || 1;
+  const percent = (item.qty / maxQty) * 100;
+
+  return `
+  <tr>
+    <td>${i === 0 ? '🔥 ' : ''}${item.name}</td>
+    <td>${item.qty}</td>
+    <td>
+      ${formatCurrency(item.total)}
+      <div style="height:6px;background:#2a3142;border-radius:5px;margin-top:5px;overflow:hidden">
+        <div style="width:${percent}%;height:100%;background:#6c5ce7;"></div>
       </div>
-    `;
+    </td>
+  </tr>
+`}).join('')}
+            </tbody>
+          </table>
+        </div>
+      `
+  }
+</div>
+      </div>
+      <div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-chart-line"></i> Sales Analytics</h3>
+  </div>
+
+<div style="display:flex; gap:10px; margin-bottom:10px;">
+  <button onclick="changeChart('daily')">Daily</button>
+  <button onclick="changeChart('weekly')">Weekly</button>
+  <button onclick="changeChart('monthly')">Monthly</button>
+  <button onclick="changeChart('profit')">Profit</button>
+</div>
+
+  <canvas id="salesChart" height="120"></canvas>
+</div>
+
+</div>
+`;
+
+pc.innerHTML += `
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-brain"></i> Smart Insights</h3>
+  </div>
+  <div style="padding:10px; line-height:1.8">
+    <p>🔥 Best Sale: ₹${best}</p>
+    <p>📉 Lowest Sale: ₹${low}</p>
+    <p>📊 Avg Sale: ₹${avg}</p>
+  </div>
+</div>
+`;
+
   } catch (e) {
     pc.innerHTML = `<div class="text-center text-danger">Error loading dashboard: ${e.message}</div>`;
   }
@@ -734,6 +1045,12 @@ async function renderStock() {
     const snap = await db.collection('shops').doc(currentUser.uid).collection('stock').orderBy('name').get();
     const items = [];
     snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+    
+    let lowStock = items.filter(i => i.qty <= 5).length;
+    
+    if (lowStock > 0) {
+  toast(`${lowStock} items low stock ⚠️`, 'warning');
+}
 
     pc.innerHTML = `
       <div class="card">
@@ -766,6 +1083,9 @@ async function renderStock() {
     `;
   } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
 }
+setTimeout(() => {
+  renderChart();
+}, 300);
 
 function filterStockTable() {
   const q = ($('stockSearch')?.value || '').toLowerCase();
@@ -835,6 +1155,48 @@ async function renderBilling() {
     renderBillingUI();
   } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
 }
+async function autoFillCustomer() {
+  const mobile = document.getElementById("custMobile")?.value.trim();
+
+  if (!mobile || mobile.length !== 10) return;
+
+  try {
+    const snap = await db.collection('shops')
+      .doc(currentUser.uid)
+      .collection('invoices')
+      .where('customerMobile', '==', mobile)
+      .orderBy('createdAt', 'desc')
+      .limit(1)
+      .get();
+
+    if (!snap.empty) {
+      const data = snap.docs[0].data();
+
+      document.getElementById("custName").value = data.customerName || "";
+      document.getElementById("custAddress").value = data.customerAddress || "";
+
+      toast("Repeat customer detected ✅", "success");
+    }
+
+    // 🔥 NEW PART (TOTAL SPEND)
+    const all = await db.collection('shops')
+      .doc(currentUser.uid)
+      .collection('invoices')
+      .where('customerMobile','==',mobile)
+      .get();
+
+    let totalSpent = 0;
+    all.forEach(d=>{
+      totalSpent += Number(d.data().grandTotal || 0);
+    });
+
+    document.getElementById("custTotal").innerText =
+      "Total Spend: ₹" + totalSpent;
+
+  } catch (e) {
+    console.error(e);
+  }
+}
 function updateBillSummaryOnly() {
   const subtotal = cart.reduce((s, c) => s + (c.sp * c.cartQty), 0);
 
@@ -893,10 +1255,13 @@ function renderBillingUI() {
           <h3 class="mb-10"><i class="fas fa-user"></i> Customer Details</h3>
           <div class="grid-2">
             <div class="form-group"><label>Customer Name</label><input type="text" id="custName" value="${$('custName')?.value || ''}"></div>
-            <div class="form-group"><label>Mobile</label><input type="tel" id="custMobile" value="${$('custMobile')?.value || ''}" maxlength="10"></div>
+            <div class="form-group"><label>Mobile</label><input type="tel" id="custMobile" oninput="autoFillCustomer()" value="${$('custMobile')?.value || ''}" maxlength="10"></div>
           </div>
           <div class="form-group"><label>Address</label><input type="text" id="custAddress" value="${$('custAddress')?.value || ''}"></div>
         </div>
+        <div id="custTotal" class="text-muted" style="margin-top:5px">
+  Total Spend: ${document.getElementById("custTotal")?.innerText || "₹0"}
+</div>
         <div class="card">
           <h3 class="mb-10"><i class="fas fa-search"></i> Search & Add Items</h3>
           <div class="search-dropdown">
@@ -1125,6 +1490,7 @@ function removeFromCart(idx) { cart.splice(idx, 1); renderBillingUI(); }
 // ============================================================
 function handleSaveBillClick() {
   const subtotal = cart.reduce((s, c) => s + (c.sp * c.cartQty), 0);
+
   const discAmt = Number(document.getElementById("billDiscAmt")?.value) || 0;
   const discPct = Number(document.getElementById("billDiscPct")?.value) || 0;
   const gstPct = Number(document.getElementById("billGstPct")?.value) || 0;
@@ -1140,7 +1506,12 @@ function handleSaveBillClick() {
   saveBill(grandTotal, paid, due, discTotal, gstAmt, subtotal);
 }
 
-async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal) {
+async function saveBill(grandTotal, paid, due, discount, gstAmt, subtotal, profit) {
+  let profitCalc = 0;
+
+cart.forEach(item=>{
+  profitCalc += ((item.sp || 0) - (item.cp || 0)) * item.cartQty;
+});
   if (cart.length === 0) return toast('Cart is empty', 'error');
   try {
     const uid = currentUser.uid;
@@ -1166,6 +1537,7 @@ const invoiceNumber = "INV-" + String(counter).padStart(5, "0");
       customerAddress: $('custAddress')?.value?.trim() || '',
       items: cart.map(c => ({ stockId: c.id, name: c.name, mrp: c.mrp, sp: c.sp, qty: c.cartQty, total: c.sp * c.cartQty })),
       subtotal, discount, gstAmt, grandTotal, paid, due,
+      profit: profitCalc,
       payments: paid > 0 ? [{ amount: paid, method: 'cash', date: todayStr() }] : []
     };
     
@@ -1786,39 +2158,114 @@ lastInvoiceData = inv;
 // PAYMENTS / DUE TRACKING
 // ============================================================
 async function renderPayments() {
+
   const pc = $('pageContent');
-  pc.innerHTML = '<div class="text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+  pc.innerHTML = `
+    <div class="text-center text-muted">
+      <i class="fas fa-spinner fa-spin"></i> Loading...
+    </div>
+  `;
+
   try {
-    const snap = await db.collection('shops').doc(currentUser.uid).collection('invoices').where('due', '>', 0).get();
+
+    let monthlyProfit = 0;
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const snap = await db.collection('shops')
+      .doc(currentUser.uid)
+      .collection('invoices')
+      .get();
+
+    snap.forEach(d=>{
+      const data = d.data();
+      const invDate = new Date(data.date + "T00:00:00");
+
+      if (
+        invDate.getMonth() === currentMonth &&
+        invDate.getFullYear() === currentYear
+      ) {
+        monthlyProfit += Number(data.profit || 0);
+      }
+    });
+
+    const dueSnap = await db.collection('shops')
+      .doc(currentUser.uid)
+      .collection('invoices')
+      .where('due','>',0)
+      .get();
+
     const dues = [];
     let totalDue = 0;
-    snap.forEach(d => { const data = d.data(); totalDue += Number(data.due || 0); dues.push({ id: d.id, ...data }); });
+
+    dueSnap.forEach(d=>{
+      const data = d.data();
+      totalDue += Number(data.due || 0);
+      dues.push({ id: d.id, ...data });
+    });
 
     pc.innerHTML = `
-      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
-        <div class="stat-card"><div class="stat-icon icon-due"><i class="fas fa-hand-holding-dollar"></i></div><div class="stat-value">${formatCurrency(totalDue)}</div><div class="stat-label">Total Pending Due</div></div>
-        <div class="stat-card"><div class="stat-icon icon-bills"><i class="fas fa-file-invoice"></i></div><div class="stat-value">${dues.length}</div><div class="stat-label">Pending Invoices</div></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3><i class="fas fa-money-bill-wave"></i> Due Invoices</h3></div>
-        <div class="table-wrap">
-          <table><thead><tr><th>Invoice</th><th>Customer</th><th>Total</th><th>Paid</th><th>Due</th><th>Action</th></tr></thead>
-          <tbody>
-          ${dues.length === 0 ? '<tr><td colspan="6" class="text-center text-muted">No pending dues 🎉</td></tr>' : dues.map(d => `
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">${formatCurrency(monthlyProfit)}</div>
+      <div class="stat-label">Monthly Profit</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">${formatCurrency(totalDue)}</div>
+      <div class="stat-label">Total Due</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Due Invoices (${dues.length})</h3>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Due</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${dues.length === 0 ? `
+            <tr><td colspan="6" class="text-center">No dues</td></tr>
+          ` : dues.map(inv => `
             <tr>
-              <td>${d.invoiceNumber || '-'}</td>
-              <td>${d.customerName || 'Walk-in'}<br><span class="text-muted" style="font-size:.75rem">${d.customerMobile || ''}</span></td>
-              <td>${formatCurrency(d.grandTotal)}</td>
-              <td class="text-success">${formatCurrency(d.paid)}</td>
-              <td class="text-danger"><strong>${formatCurrency(d.due)}</strong></td>
-              <td><button class="btn btn-success btn-xs" onclick="showPaymentModal('${d.id}',${d.due})"><i class="fas fa-money-bill"></i> Record Payment</button></td>
+              <td>${inv.invoiceNumber}</td>
+              <td>${inv.customerName || 'Walk-in'}</td>
+              <td>${formatCurrency(inv.grandTotal)}</td>
+              <td class="text-success">${formatCurrency(inv.paid)}</td>
+              <td class="text-danger">${formatCurrency(inv.due)}</td>
+
+              <td>
+                <button class="btn btn-success btn-xs"
+                  onclick="showPaymentModal('${inv.id}', ${inv.due})">
+                  💰 Receive
+                </button>
+              </td>
             </tr>
           `).join('')}
-          </tbody></table>
-        </div>
-      </div>
-    `;
-  } catch (e) { pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`; }
+        </tbody>
+      </table>
+    </div>
+  </div>
+`;
+
+  } catch (e) {
+    pc.innerHTML = `<div class="text-danger">Error: ${e.message}</div>`;
+  }
 }
 
 function showPaymentModal(invId, dueAmt) {
@@ -2111,7 +2558,7 @@ async function downloadBackup() {
     const stockSnap = await db.collection('shops').doc(uid).collection('stock').get();
     stockSnap.forEach(d => data.stock.push({ id: d.id, ...d.data() }));
 
-    const invSnap = await db.collection('shops').doc(uid).collection('invoices').get();
+    const invSnap = await db.collection('shops').doc(uid).limit(500);
     invSnap.forEach(d => data.invoices.push({ id: d.id, ...d.data() }));
 
     const expSnap = await db.collection('shops').doc(uid).collection('expenses').get();
