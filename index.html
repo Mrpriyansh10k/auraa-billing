@@ -1781,7 +1781,9 @@ function showInvoiceOptionsPopup(inv) {
       </button>
 
       <button class="btn btn-success w-full mb-10"
-onclick="shareInvoicePDFToCustomer('${inv.invoiceNumber}','${inv.customerMobile || ''}')">
+onclick="openWhatsAppDirect('${inv.invoiceNumber}','${inv.customerMobile || ''}')">
+<i class="fab fa-whatsapp"></i> Open WhatsApp Chat
+</button>
   <i class="fab fa-whatsapp"></i> Share PDF to Customer
 </button>
 
@@ -1903,6 +1905,26 @@ AURAA BILLING PRO ${APP_VERSION}`;
   window.open(`https://wa.me/91${customerMobile}?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
+function openWhatsAppDirect(invoiceNumber, customerMobile){
+
+  customerMobile = (customerMobile || "").replace(/\D/g, "");
+
+  if(customerMobile.length !== 10){
+    return toast("Customer number invalid!", "error");
+  }
+
+  let msg = `Namaste 😊
+
+Aapka bill ready hai
+
+Invoice: ${invoiceNumber}
+
+Kripya PDF attach karke bhej dein 👍`;
+
+  let url = `https://wa.me/91${customerMobile}?text=${encodeURIComponent(msg)}`;
+
+  window.open(url, "_blank");
+}
 
 async function shareInvoiceImageToCustomer(invoiceNumber, customerMobile) {
   
