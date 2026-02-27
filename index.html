@@ -2785,7 +2785,7 @@ async function adminResetDevices(uid) {
     loadAdminShops();
   } catch (e) { toast('Error: ' + e.message, 'error'); }
 }
-
+  
 async function adminExtendTrial(uid, days) {
   try {
     const ref = db.collection('shops').doc(uid);
