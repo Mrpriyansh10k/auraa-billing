@@ -673,8 +673,16 @@ function renderApp() {
         <nav class="sidebar-nav">
           <div class="nav-item ${currentPage === 'dashboard' ? 'active' : ''}" onclick="navigate('dashboard')"><i class="fas fa-home"></i> Dashboard</div>
           <div class="nav-item ${currentPage === 'billing' ? 'active' : ''}" onclick="navigate('billing')"><i class="fas fa-cash-register"></i> New Bill</div>
-          <div class="nav-item ${currentPage === 'history' ? 'active' : ''}" onclick="navigate('history')"><i class="fas fa-file-invoice"></i> Invoice History</div>
-          <div class="nav-item ${currentPage === 'payments' ? 'active' : ''}" onclick="navigate('payments')"><i class="fas fa-money-bill-wave"></i> Due / Payments</div>
+          ${!staffMode ? `
+<div class="nav-item ${currentPage === 'history' ? 'active' : ''}" onclick="navigate('history')">
+<i class="fas fa-file-invoice"></i> Invoice History
+</div>
+` : ``}
+          ${!staffMode ? `
+<div class="nav-item ${currentPage === 'payments' ? 'active' : ''}" onclick="navigate('payments')">
+<i class="fas fa-money-bill-wave"></i> Due / Payments
+</div>
+` : ``}
           ${!staffMode ? `
             <div class="nav-divider"></div>
             <div class="nav-item ${currentPage === 'stock' ? 'active' : ''}" onclick="navigate('stock')"><i class="fas fa-boxes-stacked"></i> Stock</div>
@@ -726,6 +734,10 @@ function navigate(page) {
 }
 
 function renderPage(page) {
+  if (staffMode && (page === 'history' || page === 'payments' || page === 'stock' || page === 'expenses')) {
+toast("Access denied in staff mode", "error");
+page = "dashboard";
+}
   const titles = { dashboard: 'Dashboard', billing: 'New Bill', history: 'Invoice History', payments: 'Due / Payments', stock: 'Stock Management', expenses: 'Expenses', settings: 'Settings', backup: 'Backup / Restore', admin: 'Admin Panel' };
   const pt = $('pageTitle');
   if (pt) pt.textContent = titles[page] || 'Dashboard';
@@ -1667,8 +1679,14 @@ function printInvoice(inv) {
         </p>
 
         <p style="font-size:9px;margin-top:5px;color:gray;">
-          Powered by AURAA BILLING PRO ${APP_VERSION}
-        </p>
+Powered by 
+<a href="https://mrpriyansh10k.github.io/auraa-billing/"
+style="color:#6c5ce7;text-decoration:none;font-weight:bold">
+
+AURAA BILLING PRO
+
+</a> ${APP_VERSION}
+</p>
       </div>
     `;
 
@@ -1741,7 +1759,18 @@ function printInvoice(inv) {
 
         <p style="text-align:center;color:#777;font-size:12px;">
           Thank you for your business!<br>
-          Powered by AURAA BILLING PRO ${APP_VERSION} | Support: ${WHATSAPP} | @${INSTAGRAM}
+          <p style="text-align:center;color:#777;font-size:12px;">
+Thank you for your business!<br>
+
+Powered by 
+<a href="https://mrpriyansh10k.github.io/auraa-billing/"
+style="color:#6c5ce7;font-weight:bold;text-decoration:none">
+
+AURAA BILLING PRO
+
+</a> ${APP_VERSION}
+
+</p>
         </p>
       </div>
     `;
@@ -1804,54 +1833,30 @@ onclick="shareInvoiceImageToCustomer('${inv.invoiceNumber}','${inv.customerMobil
 async function downloadInvoicePDF(invoiceNumber) {
 
   if (!lastInvoiceData) {
-    return toast("Invoice data missing!", "error");
+    return toast("Invoice data missing! Please open invoice again.", "error");
   }
 
+  // ✅ always correct invoice number
   invoiceNumber = lastInvoiceData.invoiceNumber || invoiceNumber;
 
-  // 🔥 STEP 1: Render invoice
   printInvoice(lastInvoiceData);
+  await new Promise(r => setTimeout(r, 200));
 
-  const printArea = document.getElementById("printArea");
-  printArea.style.display = "block";
-printArea.style.position = "fixed";
-printArea.style.top = "0";
-printArea.style.left = "0";
-printArea.style.zIndex = "9999";
-
-  // 🔥 STEP 2: WAIT PROPERLY
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-await new Promise(r => setTimeout(r, 500));
-await new Promise(r => setTimeout(r, 300));
-
-  // 🔥 STEP 3: FONT LOAD
-  if (document.fonts) {
-    await document.fonts.ready;
-  }
-
-  // 🔥 STEP 4: SCROLL FIX
-  window.scrollTo(0, 0);
-
-  const el = document.getElementById("invoiceBox");
+const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
 
+  const printArea = document.getElementById("printArea");
+  const oldDisplay = printArea.style.display;
+
   try {
+    printArea.style.display = "block";
 
     const opt = {
       margin: 0.3,
       filename: invoiceNumber + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: {
-        scale: 3,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        scrollY: 0
-      },
-      jsPDF: {
-        unit: "in",
-        format: "a4",
-        orientation: "portrait"
-      }
+      html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
     };
 
     await html2pdf().set(opt).from(el).save();
@@ -1863,7 +1868,52 @@ await new Promise(r => setTimeout(r, 300));
     console.error(e);
 
   } finally {
-    printArea.style.display = "none";
+    printArea.style.display = oldDisplay;
+  }
+}
+
+async function downloadInvoiceImage(invoiceNumber) {
+
+  if (!lastInvoiceData) {
+    return toast("Invoice data missing!", "error");
+  }
+
+  // ✅ always correct invoice number
+  invoiceNumber = lastInvoiceData.invoiceNumber || invoiceNumber;
+
+  printInvoice(lastInvoiceData);
+  await new Promise(r => setTimeout(r, 200));
+
+  const el = document.getElementById("invoiceBox");
+  if (!el) return toast("Invoice not found", "error");
+
+  const printArea = document.getElementById("printArea");
+  const oldDisplay = printArea.style.display;
+
+  try {
+    printArea.style.display = "block";
+
+    const canvas = await html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: "#ffffff"
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.href = imgData;
+    link.download = invoiceNumber + ".png";
+    link.click();
+
+    toast("Image Download Successful!", "success");
+
+  } catch (e) {
+    toast("Image Download Failed: " + e.message, "error");
+    console.error(e);
+
+  } finally {
+    printArea.style.display = oldDisplay;
   }
 }
 
@@ -1905,79 +1955,110 @@ Kripya PDF attach karke bhej dein 👍`;
   window.open(url, "_blank");
 }
 
-async function shareInvoicePDFToCustomer(invoiceNumber, customerMobile) {
-
+async function shareInvoiceImageToCustomer(invoiceNumber, customerMobile) {
+  
   customerMobile = (customerMobile || "").replace(/\D/g, "");
+
   if (customerMobile.length !== 10) {
     return toast("Customer mobile number invalid!", "error");
   }
-
-  if (!lastInvoiceData) {
-    return toast("Invoice data missing!", "error");
-  }
-
-  invoiceNumber = lastInvoiceData.invoiceNumber || invoiceNumber;
-
-  // 🔥 render
-  printInvoice(lastInvoiceData);
-
-  const printArea = document.getElementById("printArea");
-  printArea.style.display = "block";
-
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-await new Promise(r => setTimeout(r, 500));
-await new Promise(r => setTimeout(r, 300));
-  if (document.fonts) await document.fonts.ready;
-
-  window.scrollTo(0, 0);
 
   const el = document.getElementById("invoiceBox");
   if (!el) return toast("Invoice not found", "error");
 
   try {
+    const canvas = await html2canvas(el, { scale: 2 });
 
+    const blob = await new Promise((resolve) => {
+      canvas.toBlob(resolve, "image/png");
+    });
+
+    if (!blob) return toast("Image generation failed", "error");
+
+    const file = new File([blob], invoiceNumber + ".png", { type: "image/png" });
+
+    // ✅ If browser supports direct share
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+      await navigator.share({
+        title: "Invoice " + invoiceNumber,
+        text: "Invoice Generated - " + invoiceNumber,
+        files: [file]
+      });
+
+      toast("Invoice Image Shared Successfully!", "success");
+
+      // ✅ After sharing, open WhatsApp message
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
+
+    } 
+    // ❌ If share not supported
+    else {
+      toast("Direct Share not supported. Opening WhatsApp...", "warning");
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
+    }
+
+  } catch (e) {
+    toast("Share failed: " + e.message, "error");
+    console.error(e);
+  }
+}
+
+
+async function shareInvoicePDFToCustomer(invoiceNumber, customerMobile) {
+  
+  customerMobile = (customerMobile || "").replace(/\D/g, "");
+
+  if (customerMobile.length !== 10) {
+    return toast("Customer mobile number invalid!", "error");
+  }
+
+  const el = document.getElementById("invoiceBox");
+  if (!el) return toast("Invoice not found", "error");
+
+  try {
     const opt = {
       margin: 0.3,
       filename: invoiceNumber + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: {
-        scale: 3,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        scrollY: 0
-      },
-      jsPDF: {
-        unit: "in",
-        format: "a4",
-        orientation: "portrait"
-      }
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
     };
 
     const pdfBlob = await html2pdf().set(opt).from(el).outputPdf("blob");
 
+    if (!pdfBlob) return toast("PDF generation failed", "error");
+
     const file = new File([pdfBlob], invoiceNumber + ".pdf", { type: "application/pdf" });
 
+    // ✅ If browser supports direct share
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
 
       await navigator.share({
-        title: "Invoice PDF",
+        title: "Invoice PDF " + invoiceNumber,
+        text: "Invoice PDF Generated - " + invoiceNumber,
         files: [file]
       });
 
-      toast("PDF Shared!", "success");
+      toast("Invoice PDF Shared Successfully!", "success");
 
-    } else {
-      toast("Share not supported, opening WhatsApp", "warning");
+      // ✅ After sharing open WhatsApp
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
+
+    } 
+    // ❌ If share not supported
+    else {
+      toast("Direct Share not supported. Opening WhatsApp...", "warning");
+      openWhatsAppCustomer(invoiceNumber, customerMobile);
     }
-
-    openWhatsAppCustomer(invoiceNumber, customerMobile);
 
   } catch (e) {
     toast("PDF share failed: " + e.message, "error");
-  } finally {
-    printArea.style.display = "none";
+    console.error(e);
   }
 }
+
+
 
 // ============================================================
 // INVOICE HISTORY
@@ -2785,7 +2866,7 @@ async function adminResetDevices(uid) {
     loadAdminShops();
   } catch (e) { toast('Error: ' + e.message, 'error'); }
 }
-  
+
 async function adminExtendTrial(uid, days) {
   try {
     const ref = db.collection('shops').doc(uid);
@@ -2833,4 +2914,4 @@ auth.onAuthStateChanged(async (user) => {
 renderLogin();
 </script>
 </body>
-  </html>
+                                                                                  </html>
